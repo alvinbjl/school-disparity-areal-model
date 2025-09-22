@@ -1,10 +1,17 @@
-# library ---------------------------------------------------------------
+# library -----------------------------------------------------------------
 library(tidyverse)
 library(ggplot2)
 library(mapview)
+# Reorder OpenStreetMap as default
+all_basemaps <- c("OpenStreetMap", 
+                  "CartoDB.Positron",  
+                  "CartoDB.DarkMatter", 
+                  "Esri.WorldImagery", 
+                  "Esri.WorldStreetMap") 
+# Set default basemap to OSM
+mapviewOptions(basemaps = all_basemaps)
+mapviewOptions(fgb = FALSE)
 library(bruneimap)
-# library(rnaturalearth)
-# library(rnaturalearthdata)
 library(geodata)
 library(sf)
 library(viridis)
@@ -13,12 +20,12 @@ library(INLA)
 library(leaflet)
 library(leaflet.extras2)
 library(RColorBrewer)
-#library(ggspatial)  # for north arrow and scale bar
 
 # Data: map ---------------------------------------------------------------------
 # Download Malaysia boundaries from GADM level1=States level=2Districts (Daerah)
 mys_state <- geodata::gadm(country = "MYS", level = 1, path = tempdir())
 mys_dis <- geodata::gadm(country = "MYS", level = 2, path = tempdir())
+# Filter only North Borneo
 mys_state_sf <-
   st_as_sf(mys_state) %>%
   select(state = NAME_1) %>%
@@ -32,18 +39,8 @@ sbh_dis_sf <- mys_dis_sf %>% filter(state == "Sabah")
 swk_dis_sf <- mys_dis_sf %>% filter(state == "Sarawak")
 east_mys_dis_sf <- mys_dis_sf %>% filter(state %in% c("Sarawak", "Sabah"))
 
-ggplot() +
-  # geom_sf(data = context, fill = "grey95", color = "grey80") +
-  geom_sf(data = sbh_state_sf, aes(fill = state), color = "black", size = 1) +
-  geom_sf(data = swk_state_sf, aes(fill = state), color = "black", size = 1) +
-  geom_sf(data = mkm_sf, aes(fill = mukim), color = "grey", size = 0.3) +
-  geom_sf(data = sbh_dis_sf, aes(fill = district), color = "grey", size = 0.3) +
-  geom_sf(data = swk_dis_sf, aes(fill = district), color = "grey", size = 0.3) +
-  theme(legend.position = "none") +
-  scale_fill_viridis_d()
-plot(swk_state_sf)
-
-# Data: Primary & secondary Schools ----------------------------------------------------------------
+# Data: Primary & secondary Schools, Population, sf ----------------------------------------------------------------
+# A. Malaysia
 mys_sch_df <- read_csv("source/mys_schools_district.csv")
 
 sbh_sch_df <- mys_sch_df %>% 
@@ -53,10 +50,10 @@ sbh_sch_df <- mys_sch_df %>%
          district != "All Districts") %>% 
   group_by(district) %>% 
   summarise(schools = sum(schools, na.rm = TRUE))
-unique(sbh_sch_df$district)
-unique(sbh_dis_sf$district)
-setdiff(sbh_dis_sf$district, sbh_sch_df$district)
-setdiff(sbh_sch_df$district, sbh_dis_sf$district)
+
+# Telupid was formerly part of the Beluran District and is now a separate 
+# administrative district with Telupid Town as its capital. 
+# Fix: merge to old map
 sbh_sch_df <- sbh_sch_df %>%
   mutate(district = case_when(
     district == "Telupid" ~ "Beluran",
@@ -64,6 +61,8 @@ sbh_sch_df <- sbh_sch_df %>%
   )) %>% 
   group_by(district) %>% 
   summarise(schools = sum(schools, na.rm = TRUE))
+setdiff(sbh_dis_sf$district, sbh_sch_df$district)
+setdiff(sbh_sch_df$district, sbh_dis_sf$district)
 
 swk_sch_df <-
   mys_sch_df %>% 
@@ -73,10 +72,7 @@ swk_sch_df <-
          district != "All Districts") %>% 
   group_by(district) %>% 
   summarise(schools = sum(schools, na.rm = TRUE))
-setdiff(swk_dis_sf$district, swk_sch_df$district)
-setdiff(swk_sch_df$district, swk_dis_sf$district)
-unique(swk_sch_df$district)
-unique(swk_dis_sf$district)
+
 swk_sch_df <- swk_sch_df %>%
   mutate(district = case_when(
     district == "Maradong" ~ "Meradong",
@@ -88,7 +84,10 @@ swk_sch_df <- swk_sch_df %>%
   )) %>% 
   group_by(district) %>% 
   summarise(schools = sum(schools, na.rm = TRUE))
+setdiff(swk_dis_sf$district, swk_sch_df$district)
+setdiff(swk_sch_df$district, swk_dis_sf$district)
 
+# Join Population
 mys_census2021 <- read_csv("source/mys_population_district.csv")
 mys_census2021 <- mys_census2021 %>% 
   as_tibble() %>% 
@@ -136,8 +135,7 @@ setdiff(sbh_census2021$district, sbh_sch_df$district)
 setdiff(swk_sch_df$district, swk_census2021$district)
 setdiff(swk_census2021$district, swk_sch_df$district)
 
-# sbh_sch_sf <- left_join(sbh_dis_sf, sbh_sch_df, by="district") %>% select(-state)
-# swk_sch_sf <- left_join(swk_dis_sf, swk_sch_df, by="district") %>% select(-state)
+# Join sf
 sbh_sch_df <- left_join(sbh_sch_df, sbh_census2021, by="district")
 swk_sch_df <- left_join(swk_sch_df, swk_census2021, by="district")
 sbh_sch_sf <- left_join(sbh_dis_sf, sbh_sch_df, by="district") %>% select(-state)
@@ -145,23 +143,10 @@ swk_sch_sf <- left_join(swk_dis_sf, swk_sch_df, by="district") %>% select(-state
 east_mys_sch_sf <- rbind(sbh_sch_sf, swk_sch_sf)
 
 mapview(east_mys_sch_sf, zcol="schools")
-mapview(swk_sch_sf, zcol="schools") +
-  mapview(sbh_sch_sf, zcol="schools") 
 
-# Telupid was formerly part of the Beluran District and is now a separate 
-# administrative district with Telupid Town as its capital. 
 
-# osm doesnt give good district data
-# library(osmdata)
-# library(sf)
-# # Example: bounding box for Malaysia
-# bbox <- getbb("Malaysia")
-# query <- opq(bbox) %>%
-#   add_osm_feature(key = "boundary", value = "administrative") %>%
-#   add_osm_feature(key = "admin_level", value = "3")  # Adjust if needed
-# districts <- osmdata_sf(query)
-# district_polygons <- districts$osm_multipolygons  # or $osm_polygons if needed
 
+# B. Brunei
 # Fix school on water village (slightly out of bound)
 brn_sch_sf <- bruneimap::sch_sf %>% 
   mutate(district = case_when(
@@ -173,6 +158,7 @@ brn_sch_sf <- bruneimap::sch_sf %>%
     TRUE ~ mukim
   ))
 
+# Filter Only Primary, Secondary Government Schools
 brn_mkm_sch_df <- brn_sch_sf %>% 
   filter(Sector == "MOE") %>% 
   select(School, Education.Level, kampong, mukim, district) %>% 
@@ -197,6 +183,7 @@ brn_dis_sch_df <- brn_sch_sf %>%
   summarise(schools = n()) %>% 
   st_drop_geometry()
 
+# Join population
 mkm_pop <- bruneimap::census2021 %>% 
   group_by(mukim) %>% 
   summarise(population = sum(population, na.rm = TRUE))
@@ -208,83 +195,34 @@ dis_pop <- bruneimap::census2021 %>%
   group_by(district) %>% 
   summarise(population = sum(population, na.rm = TRUE))
 
+# Join sf
 brn_mkm_sch_sf <- left_join(mkm_sf, brn_mkm_sch_df, by="mukim") 
 brn_dis_sch_sf <- left_join(dis_sf, brn_dis_sch_df, by="district") %>% select(district, schools)
 brn_mkm_sch_sf <- left_join(brn_mkm_sch_sf, mkm_pop, by="mukim")
 brn_dis_sch_sf <- left_join(brn_dis_sch_sf, dis_pop, by="district")
 
+# C. North Borneo
 nborneo_sch_sf <- rbind(east_mys_sch_sf, brn_dis_sch_sf)
-view(nborneo_sch_sf)
+mapview(nborneo_sch_sf)
 
-
-# 0. EDA1: school count ------------------------------------------------------------------
+# EDA1: school count ------------------------------------------------------------------
 nborneo_sch_sf <- nborneo_sch_sf %>% mutate(area = as.numeric(st_area(geometry)))
-nborneo_sch_sf <- nborneo_sch_sf %>% mutate(sch_pop = schools/population,
-                                             sch_area = schools/area)
+nborneo_sch_sf <- nborneo_sch_sf %>% mutate(sch_pop = schools/population*1000,
+                                            sch_area = schools/area * 1000000)
 
+pal <- colorRampPalette(brewer.pal(9, "YlOrRd"))
 # sch
-m1 <- mapview(nborneo_sch_sf, zcol="schools")
-# sch:pop
-m2 <- mapview(nborneo_sch_sf, zcol="sch_pop")
+m1 <- mapview(nborneo_sch_sf, zcol="schools", col.regions = pal, layer.name="School Count")
+# sch:pop per 1000
+m2 <- mapview(nborneo_sch_sf, zcol="sch_pop", col.regions = pal, layer.name="School per 1000 people")
+# sch:pop per 1000)
 #sch:area
-m3 <- mapview(nborneo_sch_sf, zcol="sch_area")
+m3 <- mapview(nborneo_sch_sf, zcol="sch_area", col.regions = pal, layer.name="School per km^2")
+# sch:pop per 1000)
 #scale:
 leafsync::sync(m1, m2, m3)
 
-# needa improve map
-label_sf <- nborneo_sch_sf |> 
-  arrange(desc(schools)) |> 
-  slice_head(n = 5) |> 
-  mutate(label = paste0(district, "\n", schools))
-
-ggplot(nborneo_sch_sf) +
-  geom_histogram(aes(schools), binwidth = 10)
-
-ggplot(nborneo_sch_sf) +
-  geom_sf(aes(fill = schools)) +
-  ggrepel::geom_label_repel(
-    data = label_sf,
-    aes(label = label, geometry = geometry),
-    stat = "sf_coordinates",
-    inherit.aes = FALSE,
-    box.padding = 1,
-    size = 3,
-    max.overlaps = Inf
-  ) +
-  scale_fill_viridis_b(
-    option = "E",
-    name = "School Count",
-    breaks = c(0,20,50,75,100)        # Number of bins
-  ) +
-  theme_minimal()
-
-label_sf <- nborneo_sch_sf |> 
-  arrange(sch_pop) |> 
-  slice_head(n = 5) |> 
-  mutate(label = paste0(district, "\n", round(sch_pop,1)))
-
-ggplot(nborneo_sch_sf) +
-  geom_histogram(aes(sch_pop), binwidth = 0.2)
-
-ggplot(nborneo_sch_sf) +
-  geom_sf(aes(fill = sch_pop)) +
-  ggrepel::geom_label_repel(
-    data = label_sf,
-    aes(label = label, geometry = geometry),
-    stat = "sf_coordinates",
-    inherit.aes = FALSE,
-    box.padding = 1,
-    size = 3,
-    max.overlaps = Inf
-  ) +
-  scale_fill_viridis_b(
-    option = "E",
-    name = "School per 1000 people",
-    breaks = c(0,0.5,1,2)        # Number of bins
-  ) +
-  theme_minimal()
-
-# 0. EDA2: std_tcr --------------------------------------------------------
+# EDA2: std_tcr --------------------------------------------------------
 # student teacher ratio
 brn_tchr <- bruneimap::tchr %>% 
   mutate(teachers = as.numeric(M) + as.numeric(`F`),
@@ -296,7 +234,7 @@ brn_tchr <- bruneimap::tchr %>%
   filter(Sector == "MOE",
          stage %in% c("primary", "secondary")) %>% 
   select(district, stage, teachers)
-  
+
 brn_enrolment <- bruneimap::enrolment %>% 
   mutate(students = as.numeric(M) + as.numeric(`F`),
          district = District,
@@ -369,7 +307,6 @@ setdiff(east_mys_tchr$district, east_mys_dis_sf$district)
 setdiff(east_mys_dis_sf$district, east_mys_tchr$district)
 setdiff(east_mys_enrolment$district, east_mys_dis_sf$district)
 setdiff(east_mys_dis_sf$district, east_mys_enrolment$district)
-
 # mys_enrolment[mys_enrolment$district %in% c("Matu", "Pakan", "Selangau"),]
 # some changes in administartive boudnaries in 2017/2018
 
@@ -394,25 +331,36 @@ nborneo_std_tchr_sf <- nborneo_std_tchr_sf %>%
 std_tcr_primary <- nborneo_std_tchr_sf %>%  filter(stage == "primary") %>%  st_as_sf()
 std_tcr_secondary <- nborneo_std_tchr_sf %>%  filter(stage == "secondary") %>%  st_as_sf()
 
-pal <- colorRampPalette(brewer.pal(9, "YlOrRd"))
 at <- seq(min(std_tcr_primary$std_tcr), max(std_tcr_primary$std_tcr), length.out = 5)
-mapview(std_tcr_primary, zcol="std_tcr", col.regions = pal, at = at)
+mapview(std_tcr_primary, zcol="std_tcr", col.regions = pal, at = at,
+        color = "#3b3b3b",
+        layer.name="Primary - std:tcr",
+        highlight = leaflet::highlightOptions(weight = 4),
+        popup = leafpop::popupTable(dplyr::mutate_if(std_tcr_primary, is.numeric,
+                                                     round, digits = 2),
+                                    zcol = c("district", "students", "teachers", "std_tcr"),
+                                    row.numbers = FALSE, feature.id = FALSE))
 
 at <- seq(min(std_tcr_secondary$std_tcr, na.rm = TRUE), 
           max(std_tcr_secondary$std_tcr, na.rm = TRUE), length.out = 5)
-mapview(std_tcr_secondary, zcol="std_tcr", col.regions = pal, at = at)
+mapview(std_tcr_secondary, zcol="std_tcr", col.regions = pal, at = at,
+        color = "#3b3b3b",
+        layer.name="Secondary - std:tcr",
+        highlight = leaflet::highlightOptions(weight = 4),
+        popup = leafpop::popupTable(dplyr::mutate_if(std_tcr_secondary, is.numeric,
+                                                     round, digits = 2),
+                                    zcol = c("district", "students", "teachers", "std_tcr"),
+                                    row.numbers = FALSE, feature.id = FALSE))
 # Putatan NA <= only 1 primary school, 0 secondary
 
-# 1. spatial autocorrelation (primary & secondary) ----------------------------------------------
-# needa filter gov. schools for bn
-# drop some districts in sarawak
-
-# sarawk vs # sabah  vs #brunei
 
 
+# 1. Global Spatial Autocorrelation ---------------------------------------
 
-# 2. Model y ~ pop + wealth + u_i (Focus Brunei) --------------------------
-# not enough good age group data
+
+# 2. Model y ~ pop + hp (socioeconomic) + u_i +v_i (Only Brunei, by mukim) --------------------------
+
+# hp
 hp <- read_csv("source/brn_house_price.csv")
 hp <- hp %>% 
   group_by(mukim) %>%
@@ -427,25 +375,30 @@ brn_mkm_sch_sf <- brn_mkm_sch_sf %>%
   mutate(hp = price) %>% 
   select(-X, -Y, -perimeter, -area, -price, -id)
 
-mapview(brn_mkm_sch_sf, zcol="hp")
 
-# Issue: simulate missing data using house price using   
-# Fix 1: INLA? (bad prediction, not enough covariates)
-test <- brn_mkm_sch_sf
-nb <- poly2nb(test)
+
+
+
+# Fix missing hp using INLA (gaussian)
+# Other options: 
+# educated guess based on location & population
+test <- brn_mkm_sch_sf #refer to appendix
+#   Alt 1. drop missing data (would lost info)
+#   Alt 2. Fill in using mean of neighbours (need loop, complicated, some neighbours also NA)
+nb <- poly2nb(brn_mkm_sch_sf)
 nb2INLA("map.adj", nb)
 g <- inla.read.graph(filename = "map.adj")
-test$re_u <- 1:nrow(test)
-test$log.hp <- log(test$hp)
+brn_mkm_sch_sf$re_u <- 1:nrow(brn_mkm_sch_sf)
+brn_mkm_sch_sf$log.hp <- log(brn_mkm_sch_sf$hp)
 formula <- log.hp ~ f(re_u, model = "bym2", graph = g)
-res <- inla(formula, family="gaussian", data=test, 
+res <- inla(formula, family="gaussian", data=brn_mkm_sch_sf, 
             control.predictor=list(compute=TRUE),
             control.compute = list(return.marginals.predictor = TRUE))
 
 res$summary.fitted.values$mean # values too high for forested area
-test$PM <- res$summary.fitted.values[, "mean"]
+brn_mkm_sch_sf$PM <- res$summary.fitted.values[, "mean"]
 
-# scale back to original
+# Transformation marginals with inla.tmarginal()
 marginals <- lapply(res$marginals.fitted.values,
                     FUN = function(marg){inla.tmarginal(function(x) exp(x), marg)})
 
@@ -453,73 +406,35 @@ marginals <- lapply(res$marginals.fitted.values,
 marginals_summaries <- lapply(marginals,
                               FUN = function(marg){inla.zmarginal(marg)})
 
-# Posterior mean and 95% CI
-test$PMoriginal <- sapply(marginals_summaries, '[[', "mean") 
-test$hp[is.na(test$hp)] <- test$PMoriginal[is.na(test$hp)]
-
-m1 <- mapview(test, zcol="PMoriginal")
-m2 <- mapview(test, zcol="hp")
-leafsync::sync(m1, m2)
-
-# Option 2: simulate by guess (judging by surrounding & population)
-test2 <- brn_mkm_sch_sf
-t <- test2[is.na(test2$hp),]
-mapview(t)
-
-quantile(hp$price, 0.05, na.rm = TRUE)
-test2 <- test2 %>% 
-  mutate(hp = case_when(
-    mukim == "Mukim Kuala Balai" ~ 100000,
-    mukim == "Mukim Bukit Sawat" ~ 170000,
-    mukim == "Mukim Ukong" ~ 180000,
-    mukim == "Mukim Sukang" ~ 100000,
-    mukim == "Mukim Melilas" ~ 100000,
-    mukim == "Mukim Bokok" ~ 200000,
-    mukim == "Mukim Labu" ~ 220000,
-    mukim == "Mukim Tamoi" ~ 250000,
-    mukim == "Mukim Sungai Kedayan" ~ 250000,
-    mukim == "Mukim Burong Pingai Ayer" ~ 250000,
-    mukim == "Mukim Peramu" ~ 250000,
-    mukim == "Mukim Saba" ~ 250000,
-    TRUE ~ hp
-  )) 
-
-mapview(test2, zcol="hp")
-
-# X. option 3: using mean of neighbours, still NA, need iterative, complicated
-test3 <- brn_mkm_sch_sf
-nb <- poly2nb(test3)                # neighbours
-lw <- nb2listw(nb, style = "W", zero.policy=TRUE)
-
-# neighbour mean
-house_price_nbmean <- lag.listw(lw, test3$hp, zero.policy=TRUE, NAOK=TRUE)
-
-# replace NAs
-test3$hp[is.na(test3$hp)] <- house_price_nbmean[is.na(test3$hp)]
-
-# X. option 4: drop data (would drop too much info?)
+# Posterior mean
+brn_mkm_sch_sf$PMoriginal <- sapply(marginals_summaries, '[[', "mean") 
+# Replace missing hp with predicted
+brn_mkm_sch_sf$hp[is.na(brn_mkm_sch_sf$hp)] <- brn_mkm_sch_sf$PMoriginal[is.na(brn_mkm_sch_sf$hp)]
 
 
 
 
 
 
-# SIR (bad, over highlihts, since low school count)
-test2 <- test2 %>%  filter(schools>3) # optional, to avoid extremes
-test2$area <- as.numeric(st_area(test2))
-test2$Y <- test2$schools
-test2$E <- sum(test2$schools)/sum(test2$population) * test2$population
-test2$SIR <- test2$Y/test2$E
-mapview(test2, zcol="SIR")
+# SIR (bad, overhighlihts, since low school count)
+# brn_mkm_sch_sf <- brn_mkm_sch_sf %>%  filter(schools>3) # optional, to avoid extremes
+brn_mkm_sch_sf$area <- as.numeric(st_area(brn_mkm_sch_sf))
+brn_mkm_sch_sf$Y <- brn_mkm_sch_sf$schools
+brn_mkm_sch_sf$E <- sum(brn_mkm_sch_sf$schools)/sum(brn_mkm_sch_sf$population) * brn_mkm_sch_sf$population
+brn_mkm_sch_sf$SIR <- brn_mkm_sch_sf$Y/brn_mkm_sch_sf$E
+at <- c(0,0.5,1,2,3,4,5)
+mapview(brn_mkm_sch_sf, zcol="SIR", col.region=pal, at=at, layer.name="SIR") # bad, overhighlihts, since low school count
 
-# fit model
-# Is school count too little. If poisson, ok.
-view(test2)
-nb <- poly2nb(test2)
+
+
+
+# fit model y ~ pop + area + hp (socioeconomic) + u_i +v_i
+# Concern: Is school count too little. If poisson, ok.
+nb <- poly2nb(brn_mkm_sch_sf)
 nb2INLA("map.adj", nb)
 g <- inla.read.graph(filename = "map.adj")
-test2$re_u <- 1:nrow(test2)
-test2 <- test2 %>%
+brn_mkm_sch_sf$re_u <- 1:nrow(brn_mkm_sch_sf)
+brn_mkm_sch_sf <- brn_mkm_sch_sf %>%
   mutate(
     pop_s = population / 1000,   # per 1000 people
     area_s = as.numeric(area) / 1000000,  # e.g., km^2 instead of m^2
@@ -527,177 +442,38 @@ test2 <- test2 %>%
   )
 
 formula <- Y ~ pop_s + area_s + hp_s + f(re_u, model = "bym2", graph = g)
-formula <- Y ~ pop_s + hp_s + f(re_u, model = "bym2", graph = g)
-formula <- Y ~ pop_s + f(re_u, model = "bym2", graph = g)
-formula <- Y ~ hp_s + f(re_u, model = "bym2", graph = g)
+# formula <- Y ~ pop_s + hp_s + f(re_u, model = "bym2", graph = g)
+# formula <- Y ~ pop_s + f(re_u, model = "bym2", graph = g)
+# formula <- Y ~ hp_s + f(re_u, model = "bym2", graph = g)
 
-res <- inla(formula, family = "poisson", data = test2, E=E,
+res <- inla(formula, family = "poisson", data = brn_mkm_sch_sf, E=E,
             control.predictor = list(compute = TRUE),
             control.compute = list(return.marginals.predictor = TRUE))
 
 res$summary.fixed
 
-test2$RA <- res$summary.fitted.values[, "mean"]
+brn_mkm_sch_sf$RA <- res$summary.fitted.values[, "mean"]
 
-m1 <- mapview(test2, zcol = "RA")
-m2 <- mapview(test2, zcol = "hp")
-m3 <- mapview(test2, zcol = "population")
+m1 <- mapview(brn_mkm_sch_sf, zcol = "RA", col.region=pal, at=at)
+m2 <- mapview(brn_mkm_sch_sf, zcol = "hp", col.region=pal)
+at <- c(0,100,1000,10000,20000)
+m3 <- mapview(brn_mkm_sch_sf, zcol = "population", col.region=pal, at=at)
 leafsync::sync(m1, m2, m3)
-mapview(brn_mkm_sch_sf, zcol="population")
-
-ggplot() +
-  geom_sf(data = test2, aes(fill = RA)) +
-  theme_bw() +
-  scale_fill_gradientn(
-    colours = c("#100B09", "red", "white", "grey"),   # multiple colors
-    limits = c(0,3),
-    breaks = c(0,1,2,3),
-    labels = c("0","1","2","3")
-  ) +
-  labs(fill = "Relative Abundance")
-
-ggplot() +
-  geom_sf(data = test2, aes(fill = SIR)) +
-  theme_bw() +
-  scale_fill_gradientn(
-    colours = c("red", "white", "grey")   # multiple colors
-    # limits = c(0,3),
-    # breaks = c(0,1,2,3),
-    # labels = c("0","1","2","3")
-  ) +
-  labs(fill = "SIR")
-
-ggplot() +
-  geom_sf(data = test2, aes(fill = population)) +
-  theme_bw() +
-  scale_fill_gradientn(
-    colours = c("red", "white", "grey")   # multiple colors
-    # limits = c(0,3),
-    # breaks = c(0,1,2,3),
-    # labels = c("0","1","2","3")
-  ) +
-  labs(fill = "Population")
-
-ggplot() +
-  geom_sf(data = test2, aes(fill = hp)) +
-  theme_bw() +
-  scale_fill_gradientn(
-    colours = c("grey", "white", "red")   # multiple colors
-    # limits = c(0,3),
-    # breaks = c(0,1,2,3),
-    # labels = c("0","1","2","3")
-  ) +
-  labs(fill = "House Price")
-
-test2$exc <- sapply(res$marginals.fitted.values,
-                  FUN = function(marg){inla.pmarginal(q = 0.8, marginal = marg)})
-ggplot() +
-  geom_sf(data = test2, aes(fill = exc)) +
-  theme_bw() +
-  scale_fill_gradientn(
-    colours = c("grey", "white", "red")   # multiple colors
-    # limits = c(0,3),
-    # breaks = c(0,1,2,3),
-    # labels = c("0","1","2","3")
-  ) +
-  labs(fill = "Exceedance Probability RA < 0.8 ")
 
 
-# temperorary: test1 -------------------------------------------------------------
-#test <- test %>%  filter(schools>3) # optional, to avoid extremes
-test$area <- as.numeric(st_area(test))
-test$Y <- test$schools
-test$E <- sum(test$schools)/sum(test$population) * test$population
-test$SIR <- test$Y/test$E
-mapview(test, zcol="SIR")
 
-# fit model
-# Is school count too little. If poisson, ok.
-view(test)
-nb <- poly2nb(test)
-nb2INLA("map.adj", nb)
-g <- inla.read.graph(filename = "map.adj")
-test$re_u <- 1:nrow(test)
-test <- test %>%
-  mutate(
-    pop_s = population / 1000,   # per 1000 people
-    area_s = as.numeric(area) / 1000000,  # e.g., km^2 instead of m^2
-    hp_s = hp / 1000              # per 1000 currency units
-  )
+# Use Exceedance Prob.
+brn_mkm_sch_sf$exc <- sapply(res$marginals.fitted.values,
+                    FUN = function(marg){inla.pmarginal(q = 0.75, marginal = marg)})
 
-formula <- Y ~ pop_s + area_s + hp_s + f(re_u, model = "bym2", graph = g)
-formula <- Y ~ pop_s + hp_s + f(re_u, model = "bym2", graph = g)
-formula <- Y ~ pop_s + f(re_u, model = "bym2", graph = g)
-formula <- Y ~ hp_s + f(re_u, model = "bym2", graph = g)
+at <- c(0,0.25,0.5,0.75,1)
+mapview(brn_mkm_sch_sf, zcol = "exc", col.region=pal, at=at, 
+        layer.name="Exceedance Probability RA < 0.8")
 
-res <- inla(formula, family = "poisson", data = test, E=E,
-            control.predictor = list(compute = TRUE),
-            control.compute = list(return.marginals.predictor = TRUE))
 
-res$summary.fixed
 
-test$RA <- res$summary.fitted.values[, "mean"]
 
-m1 <- mapview(test, zcol = "RA")
-m2 <- mapview(test, zcol = "hp")
-m3 <- mapview(test, zcol = "population")
-leafsync::sync(m1, m2, m3)
-mapview(brn_mkm_sch_sf, zcol="population")
 
-ggplot() +
-  geom_sf(data = test, aes(fill = RA)) +
-  theme_bw() +
-  scale_fill_gradientn(
-    colours = c("#100B09", "red", "white", "grey"),   # multiple colors
-    limits = c(0,3),
-    breaks = c(0,1,2,3),
-    labels = c("0","1","2","3")
-  ) +
-  labs(fill = "Relative Abundance")
 
-ggplot() +
-  geom_sf(data = test, aes(fill = SIR)) +
-  theme_bw() +
-  scale_fill_gradientn(
-    colours = c("red", "white", "grey")   # multiple colors
-    # limits = c(0,3),
-    # breaks = c(0,1,2,3),
-    # labels = c("0","1","2","3")
-  ) +
-  labs(fill = "SIR")
 
-ggplot() +
-  geom_sf(data = test, aes(fill = population)) +
-  theme_bw() +
-  scale_fill_gradientn(
-    colours = c("red", "white", "grey")   # multiple colors
-    # limits = c(0,3),
-    # breaks = c(0,1,2,3),
-    # labels = c("0","1","2","3")
-  ) +
-  labs(fill = "Population")
-
-ggplot() +
-  geom_sf(data = test, aes(fill = hp)) +
-  theme_bw() +
-  scale_fill_gradientn(
-    colours = c("grey", "white", "red")   # multiple colors
-    # limits = c(0,3),
-    # breaks = c(0,1,2,3),
-    # labels = c("0","1","2","3")
-  ) +
-  labs(fill = "House Price")
-
-test$exc <- sapply(res$marginals.fitted.values,
-                    FUN = function(marg){inla.pmarginal(q = 0.8, marginal = marg)})
-ggplot() +
-  geom_sf(data = test, aes(fill = exc)) +
-  theme_bw() +
-  scale_fill_gradientn(
-    colours = c("grey", "white", "red")   # multiple colors
-    # limits = c(0,3),
-    # breaks = c(0,1,2,3),
-    # labels = c("0","1","2","3")
-  ) +
-  labs(fill = "Exceedance Probability RA < 0.8 ")
 
