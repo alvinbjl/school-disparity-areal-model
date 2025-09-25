@@ -3,3 +3,8 @@
 .RData
 .Ruserdata
 school-areal-model.Rproj
+
+/.quarto/
+site_libs
+freeze
+_freeze

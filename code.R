@@ -142,7 +142,7 @@ sbh_sch_sf <- left_join(sbh_dis_sf, sbh_sch_df, by="district") %>% select(-state
 swk_sch_sf <- left_join(swk_dis_sf, swk_sch_df, by="district") %>% select(-state)
 east_mys_sch_sf <- rbind(sbh_sch_sf, swk_sch_sf)
 
-mapview(east_mys_sch_sf, zcol="schools")
+# mapview(east_mys_sch_sf, zcol="schools")
 
 
 
@@ -203,7 +203,6 @@ brn_dis_sch_sf <- left_join(brn_dis_sch_sf, dis_pop, by="district")
 
 # C. North Borneo
 nborneo_sch_sf <- rbind(east_mys_sch_sf, brn_dis_sch_sf)
-mapview(nborneo_sch_sf)
 
 # EDA1: school count ------------------------------------------------------------------
 nborneo_sch_sf <- nborneo_sch_sf %>% mutate(area = as.numeric(st_area(geometry)))
@@ -215,11 +214,8 @@ pal <- colorRampPalette(brewer.pal(9, "YlOrRd"))
 m1 <- mapview(nborneo_sch_sf, zcol="schools", col.regions = pal, layer.name="School Count")
 # sch:pop per 1000
 m2 <- mapview(nborneo_sch_sf, zcol="sch_pop", col.regions = pal, layer.name="School per 1000 people")
-# sch:pop per 1000)
 #sch:area
 m3 <- mapview(nborneo_sch_sf, zcol="sch_area", col.regions = pal, layer.name="School per km^2")
-# sch:pop per 1000)
-#scale:
 leafsync::sync(m1, m2, m3)
 
 # EDA2: std_tcr --------------------------------------------------------
@@ -448,7 +444,8 @@ formula <- Y ~ pop_s + area_s + hp_s + f(re_u, model = "bym2", graph = g)
 
 res <- inla(formula, family = "poisson", data = brn_mkm_sch_sf, E=E,
             control.predictor = list(compute = TRUE),
-            control.compute = list(return.marginals.predictor = TRUE))
+            control.compute = list(return.marginals.predictor = TRUE),
+            verbose = TRUE)
 
 res$summary.fixed
 
@@ -460,7 +457,7 @@ at <- c(0,100,1000,10000,20000)
 m3 <- mapview(brn_mkm_sch_sf, zcol = "population", col.region=pal, at=at)
 leafsync::sync(m1, m2, m3)
 
-
+summary(res)
 
 # Use Exceedance Prob.
 brn_mkm_sch_sf$exc <- sapply(res$marginals.fitted.values,
