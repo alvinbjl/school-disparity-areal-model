@@ -20,7 +20,8 @@ library(INLA)
 library(leaflet)
 library(leaflet.extras2)
 library(RColorBrewer)
-
+library(patchwork)
+set.seed(123)
 # Data: map ---------------------------------------------------------------------
 # Download Malaysia boundaries from GADM level1=States level=2Districts (Daerah)
 mys_state <- geodata::gadm(country = "MYS", level = 1, path = tempdir())
@@ -206,18 +207,150 @@ nborneo_sch_sf <- rbind(east_mys_sch_sf, brn_dis_sch_sf)
 
 # EDA1: school count ------------------------------------------------------------------
 nborneo_sch_sf <- nborneo_sch_sf %>% mutate(area = as.numeric(st_area(geometry)))
-nborneo_sch_sf <- nborneo_sch_sf %>% mutate(sch_pop = schools/population*1000,
-                                            sch_area = schools/area * 1000000)
+nborneo_sch_sf <- nborneo_sch_sf %>% mutate(sch_pop = schools/population*100000, # per 10000 people
+                                            sch_area = schools/area * 10000000) # per 10 km^2
 
 pal <- colorRampPalette(brewer.pal(9, "YlOrRd"))
 # sch
 m1 <- mapview(nborneo_sch_sf, zcol="schools", col.regions = pal, layer.name="School Count")
 # sch:pop per 1000
-m2 <- mapview(nborneo_sch_sf, zcol="sch_pop", col.regions = pal, layer.name="School per 1000 people")
+m2 <- mapview(nborneo_sch_sf, zcol="sch_pop", col.regions = pal, layer.name="School per 10000 people")
 #sch:area
-m3 <- mapview(nborneo_sch_sf, zcol="sch_area", col.regions = pal, layer.name="School per km^2")
+m3 <- mapview(nborneo_sch_sf, zcol="sch_area", col.regions = pal, layer.name="School per 10 km^2")
 leafsync::sync(m1, m2, m3)
 
+# m1: sch
+label_sf <- nborneo_sch_sf |> 
+  arrange(desc(schools)) |> 
+  slice_head(n = 5) |> 
+  mutate(label = paste0(district, "\n", schools))
+
+ggplot(nborneo_sch_sf) +
+  geom_histogram(aes(schools), binwidth = 10)
+
+m1 <- ggplot() +
+  geom_sf(data = nborneo_sch_sf, aes(fill = schools)) +
+  geom_sf(data = filter(brn_sf, name=="Mainland"), color="black", alpha=0, linewidth=0.7)+
+  ggrepel::geom_label_repel(
+    data = label_sf,
+    aes(label = label, geometry = geometry),
+    stat = "sf_coordinates",
+    inherit.aes = FALSE,
+    box.padding = 1,
+    size = 3,
+    alpha = 0.7,
+    max.overlaps = Inf
+  ) +
+  scale_fill_viridis_b(
+    option = "E",
+    name = "School Count",
+    na.value = NA,
+    breaks = c(0,20,50,75,100)        # Number of bins
+  ) +
+  labs(x = NULL, y = NULL) +
+  theme_minimal() 
+
+# m2: population
+label_sf <- nborneo_sch_sf |> 
+  arrange(desc(population)) |> 
+  slice_head(n = 6) |> 
+  mutate(label = paste0(district, "\n", format(population, big.mark=",", scientific=F)))
+
+ggplot(nborneo_sch_sf) +
+  geom_histogram(aes(population), binwidth = 10000)
+
+m2 <- ggplot(nborneo_sch_sf) +
+  geom_sf(data = nborneo_sch_sf, aes(fill = population)) +
+  geom_sf(data = filter(brn_sf, name=="Mainland"), color="black", alpha=0, linewidth=0.7)+
+  ggrepel::geom_label_repel(
+    data = label_sf,
+    aes(label = label, geometry = geometry),
+    stat = "sf_coordinates",
+    inherit.aes = FALSE,
+    box.padding = 1,
+    size = 3,
+    alpha = 0.7,
+    force=5,
+    max.overlaps = Inf
+  ) +
+  scale_fill_viridis_b(
+    option = "E",
+    name = "Population",
+    labels = scales::comma,
+    na.value = NA,
+    breaks = c(0,30000,70000,100000, 200000,400000)        # Number of bins
+  ) +
+  labs(x = NULL, y = NULL) +
+  theme_minimal()
+
+#m3: sch_area
+label_sf <- nborneo_sch_sf |> 
+  arrange(desc(sch_area)) |> 
+  slice_head(n = 5) |> 
+  mutate(label = paste0(district, "\n", round(sch_area,2)))
+
+ggplot(nborneo_sch_sf) +
+  geom_histogram(aes(sch_area), binwidth = 0.01)
+
+m3 <- ggplot() +
+  geom_sf(data= nborneo_sch_sf, aes(fill = sch_area)) +
+  geom_sf(data = filter(brn_sf, name=="Mainland"), color="black", alpha=0, linewidth=0.7)+
+  ggrepel::geom_label_repel(
+    data = label_sf,
+    aes(label = label, geometry = geometry),
+    stat = "sf_coordinates",
+    inherit.aes = FALSE,
+    box.padding = 1,
+    size = 3,
+    alpha = 0.7,
+    force=5,
+    max.overlaps = Inf
+  ) +
+  scale_fill_viridis_b(
+    option = "E",
+    name = "School per 10 km^2",
+    na.value = NA,
+    breaks = c(0,0.1,0.2,0.3,0.5,1)        # Number of bins
+  ) +
+  labs(x = NULL, y = NULL) +
+  theme_minimal()
+
+# m4: sch_pop
+label_sf <- nborneo_sch_sf |> 
+  arrange(sch_pop) |> 
+  slice_head(n = 5) |> 
+  mutate(label = paste0(district, "\n", round(sch_pop,1)))
+
+ggplot(nborneo_sch_sf) +
+  geom_histogram(aes(sch_pop), binwidth = 5)
+
+m4 <- ggplot() +
+  geom_sf(data = nborneo_sch_sf, aes(fill = sch_pop)) +
+  geom_sf(data = filter(brn_sf, name=="Mainland"), color="black", alpha=0, linewidth=0.7) +
+  ggrepel::geom_label_repel(
+    data = label_sf,
+    aes(label = label, geometry = geometry),
+    stat = "sf_coordinates",
+    inherit.aes = FALSE,
+    box.padding = 1,
+    size = 3,
+    alpha = 0.7,
+    force=5,
+    max.overlaps = Inf
+  ) +
+  scale_fill_viridis_b(
+    option = "E",
+    name = "School per 10000 people",
+    na.value = NA,
+    breaks = c(0,50,100,200)        # Number of bins
+  ) +
+  labs(x = NULL, y = NULL) +
+  theme_minimal()
+
+# 2x1 grid
+(m1 | m3) 
+# 2x1 gird
+(m2 | m4)
 # EDA2: std_tcr --------------------------------------------------------
 # student teacher ratio
 brn_tchr <- bruneimap::tchr %>% 
@@ -349,6 +482,71 @@ mapview(std_tcr_secondary, zcol="std_tcr", col.regions = pal, at = at,
                                     row.numbers = FALSE, feature.id = FALSE))
 # Putatan NA <= only 1 primary school, 0 secondary
 
+# ggplot
+label_sf <- std_tcr_primary |> 
+  arrange(std_tcr) |> 
+  slice_head(n = 5) |> 
+  mutate(label = paste0(district, "\n", round(std_tcr,1)))
+
+ggplot(std_tcr_primary) + 
+  geom_histogram(aes(std_tcr), binwidth = 1)
+
+m5 <- ggplot() +
+  geom_sf(data = std_tcr_primary, aes(fill = std_tcr)) +
+  geom_sf(data = filter(brn_sf), color="black", alpha=0, linewidth=0.7) +
+  ggrepel::geom_label_repel(
+    data = label_sf,
+    aes(label = label, geometry = geometry),
+    stat = "sf_coordinates",
+    inherit.aes = FALSE,
+    box.padding = 1,
+    size = 3,
+    alpha = 0.7,
+    force=5,
+    max.overlaps = Inf
+  ) +
+  scale_fill_viridis_b(
+    option = "E",
+    name = "Primary std-tcr ratio",
+    na.value = NA,
+    breaks = c(0,8,10,12,14)        # Number of bins
+  ) +
+  labs(x = NULL, y = NULL) +
+  theme_minimal()
+
+label_sf <- std_tcr_secondary |> 
+  arrange(std_tcr) |> 
+  slice_head(n = 5) |> 
+  mutate(label = paste0(district, "\n", round(std_tcr,1)))
+
+ggplot(std_tcr_secondary) + 
+  geom_histogram(aes(std_tcr), binwidth = 1)
+
+m6 <- ggplot() +
+  geom_sf(data = std_tcr_secondary, aes(fill = std_tcr)) +
+  geom_sf(data = filter(brn_sf, name=="Mainland"), color="black", alpha=0, linewidth=0.7) +
+  ggrepel::geom_label_repel(
+    data = label_sf,
+    aes(label = label, geometry = geometry),
+    stat = "sf_coordinates",
+    inherit.aes = FALSE,
+    box.padding = 1,
+    size = 3,
+    alpha = 0.7,
+    force=5,
+    max.overlaps = Inf
+  ) +
+  scale_fill_viridis_b(
+    option = "E",
+    name = "Secondary std-tcr ratio",
+    na.value = NA,
+    breaks = c(0,8,10,12,14)        # Number of bins
+  ) +
+  labs(x = NULL, y = NULL) +
+  theme_minimal()
+
+m5 + m6
+
 
 
 # 1. Global Spatial Autocorrelation ---------------------------------------
@@ -421,6 +619,38 @@ brn_mkm_sch_sf$SIR <- brn_mkm_sch_sf$Y/brn_mkm_sch_sf$E
 at <- c(0,0.5,1,2,3,4,5)
 mapview(brn_mkm_sch_sf, zcol="SIR", col.region=pal, at=at, layer.name="SIR") # bad, overhighlihts, since low school count
 
+label_sf <- brn_mkm_sch_sf |> 
+  filter(SIR!=0) |> 
+  arrange(SIR) |> 
+  slice_head(n = 5) |> 
+  mutate(label = paste0(mukim, "\n", round(SIR,2)))
+
+ggplot(brn_mkm_sch_sf) + 
+  geom_histogram(aes(SIR), binwidth = 1)
+
+ggplot() +
+  geom_sf(data = brn_mkm_sch_sf, aes(fill = SIR)) +
+  geom_sf(data = filter(mkm_sf), color="grey", alpha=0, linewidth=0.7) +
+  ggrepel::geom_label_repel(
+    data = label_sf,
+    aes(label = label, geometry = geometry),
+    stat = "sf_coordinates",
+    inherit.aes = FALSE,
+    box.padding = 1,
+    size = 3,
+    alpha = 0.7,
+    force=5,
+    max.overlaps = Inf
+  ) +
+  scale_fill_viridis_b(
+    option = "E",
+    direction = -1,
+    name = "SIR",
+    na.value = NA,
+    breaks = c(0,1,2,3)    # Number of bins
+  ) +
+  labs(x = NULL, y = NULL) +
+  theme_minimal()
 
 
 
@@ -446,7 +676,7 @@ res <- inla(formula, family = "poisson", data = brn_mkm_sch_sf, E=E,
             control.predictor = list(compute = TRUE),
             control.compute = list(return.marginals.predictor = TRUE),
             verbose = TRUE)
-
+summary(res)
 res$summary.fixed
 
 brn_mkm_sch_sf$RA <- res$summary.fitted.values[, "mean"]
@@ -457,7 +687,36 @@ at <- c(0,100,1000,10000,20000)
 m3 <- mapview(brn_mkm_sch_sf, zcol = "population", col.region=pal, at=at)
 leafsync::sync(m1, m2, m3)
 
-summary(res)
+label_sf <- brn_mkm_sch_sf |> 
+  filter(RA!=0) |> 
+  arrange(RA) |> 
+  slice_head(n = 5) |> 
+  mutate(label = paste0(mukim, "\n", round(RA,2)))
+ggplot() +
+  geom_sf(data = brn_mkm_sch_sf, aes(fill = RA)) +
+  geom_sf(data = mkm_sf, color="grey", alpha=0, linewidth=0.7) +
+  ggrepel::geom_label_repel(
+    data = label_sf,
+    aes(label = label, geometry = geometry),
+    stat = "sf_coordinates",
+    inherit.aes = FALSE,
+    box.padding = 1,
+    size = 3,
+    alpha = 0.7,
+    force=5,
+    max.overlaps = Inf
+  ) +
+  scale_fill_viridis_b(
+    option = "E",
+    direction = -1,
+    name = "RR",
+    na.value = NA,
+    breaks = c(0,1,2,3)    # Number of bins
+  ) +
+  labs(x = NULL, y = NULL) +
+  theme_minimal()
+
+
 
 # Use Exceedance Prob.
 brn_mkm_sch_sf$exc <- sapply(res$marginals.fitted.values,
@@ -467,6 +726,34 @@ at <- c(0,0.25,0.5,0.75,1)
 mapview(brn_mkm_sch_sf, zcol = "exc", col.region=pal, at=at, 
         layer.name="Exceedance Probability RA < 0.8")
 
+label_sf <- brn_mkm_sch_sf |> 
+  arrange(desc(exc)) |> 
+  slice_head(n = 6) |> 
+  mutate(label = paste0(mukim, "\n", round(exc,2)))
+ggplot() +
+  geom_sf(data = brn_mkm_sch_sf, aes(fill = exc)) +
+  geom_sf(data = mkm_sf, color="grey", alpha=0, linewidth=0.7) +
+  ggrepel::geom_label_repel(
+    data = label_sf,
+    aes(label = label, geometry = geometry),
+    stat = "sf_coordinates",
+    inherit.aes = FALSE,
+    box.padding = 1,
+    size = 3,
+    alpha = 0.7,
+    force=5,
+    max.overlaps = Inf
+  ) +
+  scale_fill_viridis_b(
+    option = "E",
+    direction = 1,
+    name = "Exceedance Probability RA < 0.8",
+    na.value = NA,
+    breaks = c(0,0.25,0.5,0.75)    # Number of bins
+  ) +
+  labs(x = NULL, y = NULL) +
+  theme_minimal() +
+  theme(legend.position = "top")
 
 
 

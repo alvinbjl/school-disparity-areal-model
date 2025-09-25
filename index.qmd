@@ -25,8 +25,6 @@ abstract: |
 #| label: setup
 #| include: false
 library(tidyverse)
-
-library(tidyverse)
 library(ggplot2)
 library(mapview)
 # Reorder OpenStreetMap as default
@@ -47,7 +45,8 @@ library(INLA)
 library(leaflet)
 library(leaflet.extras2)
 library(RColorBrewer)
-
+library(patchwork)
+set.seed(123)
 # Data: map ---------------------------------------------------------------------
 # Download Malaysia boundaries from GADM level1=States level=2Districts (Daerah)
 mys_state <- geodata::gadm(country = "MYS", level = 1, path = tempdir())
@@ -230,23 +229,188 @@ brn_dis_sch_sf <- left_join(brn_dis_sch_sf, dis_pop, by="district")
 
 # C. North Borneo
 nborneo_sch_sf <- rbind(east_mys_sch_sf, brn_dis_sch_sf)
+```
 
-# EDA1: school count ------------------------------------------------------------------
+## Introduction
+
+Education is a foundational pillar of national development and its people, influencing social well-being, economic growth, and long-term sustainability. The global significance of education is recognized in Sustainable Development Goal 4, which promotes inclusive and equitable quality education for all [1]. Nationally, Brunei Darussalam’s national vision, Wawasan Brunei 2035, positions education as a cornerstone of the country's long-term development goals. Ensuring equitable access to education through sufficient infrastructure, fair resource distribution, and balanced student–teacher ratios is critical to delivering quality learning experiences.
+
+While several studies have examined general aspects of education in Brunei, there have been limited studies based on quantitative spatial methods, with only one examining the spatial distribution and hotspots of schools. This project aims to addresses that gap by first conducting a comparative analysis of school availability and student–teacher ratios across Brunei’s districts, with additional context from neighboring Malaysian states, Sarawak and Sabah. 
+
+Next, Standardized Incidence Ratios (SIR) and Bayesian hierarchical models are used to identify adminstrative regions in Brunei where school availability falls significantly below the national baseline, supporting future policy planning and school placements.
+
+<!-- The rest of this paper is organized as follows. In section -->
+<!-- [2](#sec-method){reference-type="ref" reference="sec-method"}, we -->
+<!-- describe the methodology used. In section -->
+<!-- [3](#sec-results){reference-type="ref" reference="sec-results"}, the -->
+<!-- results are shown. In section [4](#sec-conc){reference-type="ref" -->
+<!-- reference="sec-conc"}, we conclude. -->
+
+## Data
+This study focuses exclusively on government primary and secondary schools, as these institutions serve as the main access points to education for most youth. The school dataset from 2018 was used as it is the most recent year for which disaggregated school-level data is available in Brunei. Although more recent statistics exist, they are published only in summary form.
+
+Population data is drawn from the 2021 national census, the most recent census available in Brunei, despite the mismatch in years with the school dataset. Brunei conducts its national census every ten years, making the 2021 data the best option for population estimates.
+
+The following key data variables were used: school counts, administrative boundary data, population, student–teacher ratios, and house prices. These datasets were cleaned, wrangled, and merged primarily using left_join() and rbind(), with further details provided below.
+
+### Brunei
+Data on school locations, student–teacher ratios, administrative boundaries, and population were sourced from the `bruneimap` R package. The school dataset `sch_sf` includes georeferenced point data for each institution. For our areal analysis, schools were aggregated by district and mukim (finer administrative level). Despite composing of only four districts, district-level aggregation was used for broader comparisons (student–teacher ratios and school counts) to match the size of available administrative resolution in Malaysian data. Mukims ($N = 39$), which provide finer geographic resolution, were instead used for the Bayesian spatial analysis of school availability in Brunei. 
+
+To incorporate a socioeconomic indicator, we used median house prices derived from approximately 30,000 property listings spanning 1993–2025. These were calculated at the mukim level and included as a covariate in the Bayesian model. In cases where house price data were missing, values were imputed using predictions from an INLA-based Gaussian model. Manual imputations based on local knowledge were initially tested, but the INLA-predicted values were ultimately adopted, as both methods produced similar model outcomes. Given the nature of the data, house prices were treated as partially simulated estimates and may not fully reflect actual market values.
+
+### Malaysia
+Malaysian data variables were sourced from the national open data portal [data.gov.my], and include  district-level school counts and population estimates for the states of Sarawak and Sabah. Administrative boundary (districts) were obtained via the `geomdata` R package, as OpenStreetMap (`osmdata`) does not provide required administrative divisions level.
+
+Some inconsistencies were found between school data and adminstrative boundaries, particularly in areas where older districts had been subdivided into newer ones. In these cases, school counts were available only for the original (larger) districts. To ensure consistency, we excluded the newer subdivisions and manually reassigned schools in the affected areas to the nearest valid district. 
+
+
+
+## Method {#sec-method}
+
+Exploratory data anlysis using Clorepath maps for schools count, by area (usingst_area) studnet teacher ratio
+
+Neighbour type
+
+POisson INLA hierarchical model
+
+covariates: 
+house price as socio economic index
+
+Spatial Poisson model
+Justify offset (population)
+Explain fixed and random effects
+Introduce INLA + BYM
+
+
+## Results {#sec-results}
+
+```{r}
 nborneo_sch_sf <- nborneo_sch_sf %>% mutate(area = as.numeric(st_area(geometry)))
-nborneo_sch_sf <- nborneo_sch_sf %>% mutate(sch_pop = schools/population*1000,
-                                            sch_area = schools/area * 1000000)
+nborneo_sch_sf <- nborneo_sch_sf %>% mutate(sch_pop = schools/population*100000, # per 10000 people
+                                            sch_area = schools/area * 10000000) # per 10 km^2
 
-pal <- colorRampPalette(brewer.pal(9, "YlOrRd"))
-# sch
-m1 <- mapview(nborneo_sch_sf, zcol="schools", col.regions = pal, layer.name="School Count")
-# sch:pop per 1000
-m2 <- mapview(nborneo_sch_sf, zcol="sch_pop", col.regions = pal, layer.name="School per 1000 people")
-#sch:area
-m3 <- mapview(nborneo_sch_sf, zcol="sch_area", col.regions = pal, layer.name="School per km^2")
-leafsync::sync(m1, m2, m3)
+# m1: sch
+label_sf <- nborneo_sch_sf |> 
+  arrange(desc(schools)) |> 
+  slice_head(n = 5) |> 
+  mutate(label = paste0(district, "\n", schools))
+m1 <- ggplot() +
+  geom_sf(data = nborneo_sch_sf, aes(fill = schools)) +
+  geom_sf(data = filter(brn_sf, name=="Mainland"), color="black", alpha=0, linewidth=0.7)+
+  ggrepel::geom_label_repel(
+    data = label_sf,
+    aes(label = label, geometry = geometry),
+    stat = "sf_coordinates",
+    inherit.aes = FALSE,
+    box.padding = 1,
+    size = 3,
+    alpha = 0.7,
+    max.overlaps = Inf
+  ) +
+  scale_fill_viridis_b(
+    option = "E",
+    name = "School Count",
+    na.value = NA,
+    breaks = c(0,20,50,75,100)        # Number of bins
+  ) +
+  labs(x = NULL, y = NULL) +
+  theme_minimal()
 
-# EDA2: std_tcr --------------------------------------------------------
-# student teacher ratio
+# m2: population
+label_sf <- nborneo_sch_sf |> 
+  arrange(desc(population)) |> 
+  slice_head(n = 6) |> 
+  mutate(label = paste0(district, "\n", format(population, big.mark=",", scientific=F)))
+m2 <- ggplot(nborneo_sch_sf) +
+  geom_sf(dat = nborneo_sch_sf, aes(fill = population)) +
+  geom_sf(data = filter(brn_sf, name=="Mainland"), color="black", alpha=0, linewidth=0.7)+
+  ggrepel::geom_label_repel(
+    data = label_sf,
+    aes(label = label, geometry = geometry),
+    stat = "sf_coordinates",
+    inherit.aes = FALSE,
+    box.padding = 1,
+    size = 3,
+    alpha = 0.7,
+    force=5,
+    max.overlaps = Inf
+  ) +
+  scale_fill_viridis_b(
+    option = "E",
+    name = "Population",
+    labels = scales::comma,
+    na.value = NA,
+    breaks = c(0,30000,70000,100000, 200000,400000)        # Number of bins
+  ) +
+  labs(x = NULL, y = NULL) +
+  theme_minimal()
+
+#m3: sch_area
+label_sf <- nborneo_sch_sf |> 
+  arrange(desc(sch_area)) |> 
+  slice_head(n = 5) |> 
+  mutate(label = paste0(district, "\n", round(sch_area,2)))
+m3 <- ggplot() +
+  geom_sf(data= nborneo_sch_sf, aes(fill = sch_area)) +
+  geom_sf(data = filter(brn_sf, name=="Mainland"), color="black", alpha=0, linewidth=0.7)+
+  ggrepel::geom_label_repel(
+    data = label_sf,
+    aes(label = label, geometry = geometry),
+    stat = "sf_coordinates",
+    inherit.aes = FALSE,
+    box.padding = 1,
+    size = 3,
+    alpha = 0.7,
+    force=5,
+    max.overlaps = Inf
+  ) +
+  scale_fill_viridis_b(
+    option = "E",
+    name = "School per 10 km^2",
+    na.value = NA,
+    breaks = c(0,0.1,0.2,0.3,0.5,1)        # Number of bins
+  ) +
+  labs(x = NULL, y = NULL) +
+  theme_minimal()
+
+# m4: sch_pop
+label_sf <- nborneo_sch_sf |> 
+  arrange(sch_pop) |> 
+  slice_head(n = 5) |> 
+  mutate(label = paste0(district, "\n", round(sch_pop,1)))
+m4 <- ggplot() +
+  geom_sf(data = nborneo_sch_sf, aes(fill = sch_pop)) +
+  geom_sf(data = filter(brn_sf, name=="Mainland"), color="black", alpha=0, linewidth=0.7) +
+  ggrepel::geom_label_repel(
+    data = label_sf,
+    aes(label = label, geometry = geometry),
+    stat = "sf_coordinates",
+    inherit.aes = FALSE,
+    box.padding = 1,
+    size = 3,
+    alpha = 0.7,
+    force=5,
+    max.overlaps = Inf
+  ) +
+  scale_fill_viridis_b(
+    option = "E",
+    name = "School per 10000 people",
+    na.value = NA,
+    breaks = c(0,50,100,200)        # Number of bins
+  ) +
+  labs(x = NULL, y = NULL) +
+  theme_minimal()
+
+# 2x1 grid
+(m1 | m3) 
+# 2x1 gird
+(m2 | m4)
+```
+- School count quite similar, more in main city
+
+
+
+```{r}
 brn_tchr <- bruneimap::tchr %>% 
   mutate(teachers = as.numeric(M) + as.numeric(`F`),
          district = District,
@@ -354,34 +518,71 @@ nborneo_std_tchr_sf <- nborneo_std_tchr_sf %>%
 std_tcr_primary <- nborneo_std_tchr_sf %>%  filter(stage == "primary") %>%  st_as_sf()
 std_tcr_secondary <- nborneo_std_tchr_sf %>%  filter(stage == "secondary") %>%  st_as_sf()
 
-at <- seq(min(std_tcr_primary$std_tcr), max(std_tcr_primary$std_tcr), length.out = 5)
-mapview(std_tcr_primary, zcol="std_tcr", col.regions = pal, at = at,
-        color = "#3b3b3b",
-        layer.name="Primary - std:tcr",
-        highlight = leaflet::highlightOptions(weight = 4),
-        popup = leafpop::popupTable(dplyr::mutate_if(std_tcr_primary, is.numeric,
-                                                     round, digits = 2),
-                                    zcol = c("district", "students", "teachers", "std_tcr"),
-                                    row.numbers = FALSE, feature.id = FALSE))
+# ggplot
+label_sf <- std_tcr_primary |> 
+  arrange(std_tcr) |> 
+  slice_head(n = 5) |> 
+  mutate(label = paste0(district, "\n", round(std_tcr,1)))
+m5 <- ggplot() +
+  geom_sf(data = std_tcr_primary, aes(fill = std_tcr)) +
+  geom_sf(data = filter(brn_sf), color="black", alpha=0, linewidth=0.7) +
+  ggrepel::geom_label_repel(
+    data = label_sf,
+    aes(label = label, geometry = geometry),
+    stat = "sf_coordinates",
+    inherit.aes = FALSE,
+    box.padding = 1,
+    size = 3,
+    alpha = 0.7,
+    force=5,
+    max.overlaps = Inf
+  ) +
+  scale_fill_viridis_b(
+    option = "E",
+    name = "Primary std-tcr ratio",
+    na.value = NA,
+    breaks = c(0,8,10,12,14)        # Number of bins
+  ) +
+  labs(x = NULL, y = NULL) +
+  theme_minimal()
 
-at <- seq(min(std_tcr_secondary$std_tcr, na.rm = TRUE), 
-          max(std_tcr_secondary$std_tcr, na.rm = TRUE), length.out = 5)
-mapview(std_tcr_secondary, zcol="std_tcr", col.regions = pal, at = at,
-        color = "#3b3b3b",
-        layer.name="Secondary - std:tcr",
-        highlight = leaflet::highlightOptions(weight = 4),
-        popup = leafpop::popupTable(dplyr::mutate_if(std_tcr_secondary, is.numeric,
-                                                     round, digits = 2),
-                                    zcol = c("district", "students", "teachers", "std_tcr"),
-                                    row.numbers = FALSE, feature.id = FALSE))
-# Putatan NA <= only 1 primary school, 0 secondary
+label_sf <- std_tcr_secondary |> 
+  arrange(std_tcr) |> 
+  slice_head(n = 5) |> 
+  mutate(label = paste0(district, "\n", round(std_tcr,1)))
+m6 <- ggplot() +
+  geom_sf(data = std_tcr_secondary, aes(fill = std_tcr)) +
+  geom_sf(data = filter(brn_sf, name=="Mainland"), color="black", alpha=0, linewidth=0.7) +
+  ggrepel::geom_label_repel(
+    data = label_sf,
+    aes(label = label, geometry = geometry),
+    stat = "sf_coordinates",
+    inherit.aes = FALSE,
+    box.padding = 1,
+    size = 3,
+    alpha = 0.7,
+    force=5,
+    max.overlaps = Inf
+  ) +
+  scale_fill_viridis_b(
+    option = "E",
+    name = "Secondary std-tcr ratio",
+    na.value = NA,
+    breaks = c(0,8,10,12,14)        # Number of bins
+  ) +
+  labs(x = NULL, y = NULL) +
+  theme_minimal()
+
+m5 + m6
+```
+
+- studnet teacher ratio, primary simiilar other than dense city (miri, kuching, kota kinabalu), but brunei has lesser secondary std-tcr]
 
 
-
-# 1. Global Spatial Autocorrelation ---------------------------------------
-
-
-# 2. Model y ~ pop + hp (socioeconomic) + u_i +v_i (Only Brunei, by mukim) --------------------------
+### Model
+```{r}
+#| include: false
+# Model y ~ pop + hp (socioeconomic) + u_i +v_i (Only Brunei, by mukim) --------------------------
 
 # hp
 hp <- read_csv("source/brn_house_price.csv")
@@ -433,26 +634,48 @@ marginals_summaries <- lapply(marginals,
 brn_mkm_sch_sf$PMoriginal <- sapply(marginals_summaries, '[[', "mean") 
 # Replace missing hp with predicted
 brn_mkm_sch_sf$hp[is.na(brn_mkm_sch_sf$hp)] <- brn_mkm_sch_sf$PMoriginal[is.na(brn_mkm_sch_sf$hp)]
+```
 
-
-
-
-
-
-# SIR (bad, overhighlihts, since low school count)
-# brn_mkm_sch_sf <- brn_mkm_sch_sf %>%  filter(schools>3) # optional, to avoid extremes
+```{r}
 brn_mkm_sch_sf$area <- as.numeric(st_area(brn_mkm_sch_sf))
 brn_mkm_sch_sf$Y <- brn_mkm_sch_sf$schools
 brn_mkm_sch_sf$E <- sum(brn_mkm_sch_sf$schools)/sum(brn_mkm_sch_sf$population) * brn_mkm_sch_sf$population
 brn_mkm_sch_sf$SIR <- brn_mkm_sch_sf$Y/brn_mkm_sch_sf$E
-at <- c(0,0.5,1,2,3,4,5)
-mapview(brn_mkm_sch_sf, zcol="SIR", col.region=pal, at=at, layer.name="SIR") # bad, overhighlihts, since low school count
+label_sf <- brn_mkm_sch_sf |> 
+  filter(SIR!=0) |> 
+  arrange(SIR) |> 
+  slice_head(n = 5) |> 
+  mutate(label = paste0(mukim, "\n", round(SIR,2)))
+ggplot() +
+  geom_sf(data = brn_mkm_sch_sf, aes(fill = SIR)) +
+  geom_sf(data = filter(mkm_sf), color="grey", alpha=0, linewidth=0.7) +
+  ggrepel::geom_label_repel(
+    data = label_sf,
+    aes(label = label, geometry = geometry),
+    stat = "sf_coordinates",
+    inherit.aes = FALSE,
+    box.padding = 1,
+    size = 3,
+    alpha = 0.7,
+    force=5,
+    max.overlaps = Inf
+  ) +
+  scale_fill_viridis_b(
+    option = "E",
+    direction = -1,
+    name = "SIR",
+    na.value = NA,
+    breaks = c(0,1,2,3)    # Number of bins
+  ) +
+  labs(x = NULL, y = NULL) +
+  theme_minimal()
+```
+- There are significantly fewer schools in Mukim xxx
 
 
 
-
-# fit model y ~ pop + area + hp (socioeconomic) + u_i +v_i
-# Concern: Is school count too little. If poisson, ok.
+```{r}
+#| include: false
 nb <- poly2nb(brn_mkm_sch_sf)
 nb2INLA("map.adj", nb)
 g <- inla.read.graph(filename = "map.adj")
@@ -473,142 +696,91 @@ res <- inla(formula, family = "poisson", data = brn_mkm_sch_sf, E=E,
             control.predictor = list(compute = TRUE),
             control.compute = list(return.marginals.predictor = TRUE),
             verbose = TRUE)
-
+summary(res)
 res$summary.fixed
 
 brn_mkm_sch_sf$RA <- res$summary.fitted.values[, "mean"]
+```
 
-m1 <- mapview(brn_mkm_sch_sf, zcol = "RA", col.region=pal, at=at)
-m2 <- mapview(brn_mkm_sch_sf, zcol = "hp", col.region=pal)
-at <- c(0,100,1000,10000,20000)
-m3 <- mapview(brn_mkm_sch_sf, zcol = "population", col.region=pal, at=at)
-leafsync::sync(m1, m2, m3)
+```{r}
+label_sf <- brn_mkm_sch_sf |> 
+  filter(RA!=0) |> 
+  arrange(RA) |> 
+  slice_head(n = 5) |> 
+  mutate(label = paste0(mukim, "\n", round(RA,2)))
+ggplot() +
+  geom_sf(data = brn_mkm_sch_sf, aes(fill = RA)) +
+  geom_sf(data = mkm_sf, color="grey", alpha=0, linewidth=0.7) +
+  ggrepel::geom_label_repel(
+    data = label_sf,
+    aes(label = label, geometry = geometry),
+    stat = "sf_coordinates",
+    inherit.aes = FALSE,
+    box.padding = 1,
+    size = 3,
+    alpha = 0.7,
+    force=5,
+    max.overlaps = Inf
+  ) +
+  scale_fill_viridis_b(
+    option = "E",
+    direction = -1,
+    name = "RR",
+    na.value = NA,
+    breaks = c(0,1,2,3)    # Number of bins
+  ) +
+  labs(x = NULL, y = NULL) +
+  theme_minimal()
+```
 
-summary(res)
-
-# Use Exceedance Prob.
+```{r}
 brn_mkm_sch_sf$exc <- sapply(res$marginals.fitted.values,
                     FUN = function(marg){inla.pmarginal(q = 0.75, marginal = marg)})
 
-at <- c(0,0.25,0.5,0.75,1)
-mapview(brn_mkm_sch_sf, zcol = "exc", col.region=pal, at=at, 
-        layer.name="Exceedance Probability RA < 0.8")
+label_sf <- brn_mkm_sch_sf |> 
+  arrange(desc(exc)) |> 
+  slice_head(n = 6) |> 
+  mutate(label = paste0(mukim, "\n", round(exc,2)))
+ggplot() +
+  geom_sf(data = brn_mkm_sch_sf, aes(fill = exc)) +
+  geom_sf(data = mkm_sf, color="grey", alpha=0, linewidth=0.7) +
+  ggrepel::geom_label_repel(
+    data = label_sf,
+    aes(label = label, geometry = geometry),
+    stat = "sf_coordinates",
+    inherit.aes = FALSE,
+    box.padding = 1,
+    size = 3,
+    alpha = 0.7,
+    force=5,
+    max.overlaps = Inf
+  ) +
+  scale_fill_viridis_b(
+    option = "E",
+    direction = 1,
+    name = "Exceedance Probability RA < 0.8",
+    na.value = NA,
+    breaks = c(0,0.25,0.5,0.75)    # Number of bins
+  ) +
+  labs(x = NULL, y = NULL) +
+  theme_minimal() +
+  theme(legend.position = "top")
 ```
 
-## Introduction
 
-Education is a foundational pillar of human and national development, influencing social well-being, economic growth, and long-term sustainability. Ensuring equitable access to education through sufficient infrastructure, fair resource distribution, and balanced student–teacher ratios is critical to delivering quality learning experiences.
-
-The global significance of education is recognized in Sustainable Development Goal 4, which promotes inclusive and equitable quality education for all [1]. Nationally, Brunei Darussalam’s national vision, Wawasan Brunei 2035, positions education as a cornerstone of the country's long-term development goals. 
-
-While several studies have examined general aspects of education in Brunei, there have been limited studies based on quantitative spatial methods, with only one examining the spatial distribution and hotspots of schools. This project aims to addresses that gap by first conducting a comparative analysis of school availability and student–teacher ratios across Brunei’s districts, with additional context from neighboring Malaysian states, Sarawak and Sabah. Given that Brunei has higher PISA scores than Malaysia, it would be interesting to explore whether accessibility may be a potential factor. / Malaysia has more population than Brunei, how does the school compare
-
-Next, Standardized Incidence Ratios (SIR) and Bayesian hierarchical models are used to identify districts where school availability falls significantly below the national baseline,  supporting future policy planning future school placements.
-
-<!-- The rest of this paper is organized as follows. In section -->
-<!-- [2](#sec-method){reference-type="ref" reference="sec-method"}, we -->
-<!-- describe the methodology used. In section -->
-<!-- [3](#sec-results){reference-type="ref" reference="sec-results"}, the -->
-<!-- results are shown. In section [4](#sec-conc){reference-type="ref" -->
-<!-- reference="sec-conc"}, we conclude. -->
-
-## Data
-In this study, we only focus on primary and secondary public schoools. School dataset 2018 is used becaused Although newer school statistics exist, they are only published in summary form. Thus, we use the 2018 school dataset, which provides more granular spatial detail necessary for district- and mukim-level aggregation.Population census data from 2021 was used despite the mismatch in year with the school data, as Brunei conducts a national census only once every ten years, and 2021 is the most recent available.
-
-Various data variables sourced were joined using left_join() and merged using rbind() after preprocessing, sourced:
-
-### Brunei
-Data on school locations, student–teacher ratios, administrative boundaries, and population were sourced from the `bruneimap` R package. The school dataset (sch_sf) includes georeferenced point data for each institution. For this analysis, we filtered the dataset to include only government primary and secondary schools, to align with available school data in Malaysia.
-
-Despite composing of only four districts, district-level aggregation was used for broader comparisons, such as student–teacher ratios and school counts, to match the smallest available administrative unit in Malaysian data. Mukims ($N = 39$), a finer administrative level, were used for the Bayesian spatial analysis of school availability. 
-
-To incorporate a socioeconomic indicator, median house of each region data from approximately 30,000 property listings spanning 1993–2025. The median house price was calculated per mukim to represent local socioeconomic variation. Some mukims had missing data; these values were imputed using predictions from an INLA-based Gaussian model. Manual corrections based on local knowledge were initially tested, but INLA-predicted values were ultimately used, as both methods yielded similar model outcomes. Given the nature of the dataset, house prices were treated as partially simulated estimates.
-
-### Malaysia
-Malaysian data were sourced from the national open data portal [data.gov.my], including district-level school counts and population estimates for Sarawak and Sabah. The school data were filtered to include government primary and secondary schools only, for comparability with Brunei data.
-
-Administrative boundary (districts) were obtained via the `geomdata` R package, as OpenStreetMap (`osmdata`) does not provide administrative divisions at the required level of granularity.
-
-Some inconsistencies were found between school and boundary data, especially where older districts had been split into newer ones. In these cases, school counts were only available for the original (larger) districts. To maintain consistency, we excluded the newer subdivisions and manually recoded schools in affected areas to align them with the closest valid district.
+- Coefficient , sginificance
 
 
-
-## Method {#sec-method}
-
-Exploratory data anlysis using Clorepath maps for schools count, by area (usingst_area) studnet teacher ratio
-
-Neighbour type
-
-POisson INLA hierarchical model
-
-covariates: 
-house price as socio economic index
-
-Spatial Poisson model
-Justify offset (population)
-Explain fixed and random effects
-Introduce INLA + BYM
-
-
-## Results {#sec-results}
-
-- School count quite similar, more in main city
-- studnet teacher ratio, primary simiilar other than dense city (miri, kuching, kota kinabalu), but brunei has lesser secondary std-tcr
-- There are significantly fewer schools in Mukim xxx
-
-```{r}
-
-pal <- colorRampPalette(brewer.pal(9, "YlOrRd"))
-# sch
-m1 <- mapview(nborneo_sch_sf, zcol="schools", col.regions = pal, layer.name="School Count")
-# sch:pop per 1000
-m2 <- mapview(nborneo_sch_sf, zcol="sch_pop", col.regions = pal, layer.name="School per 1000 people")
-#sch:area
-m3 <- mapview(nborneo_sch_sf, zcol="sch_area", col.regions = pal, layer.name="School per km^2")
-leafsync::sync(m1, m2, m3)
-
-at <- seq(min(std_tcr_primary$std_tcr), max(std_tcr_primary$std_tcr), length.out = 5)
-mapview(std_tcr_primary, zcol="std_tcr", col.regions = pal, at = at,
-        color = "#3b3b3b",
-        layer.name="Primary - std:tcr",
-        highlight = leaflet::highlightOptions(weight = 4),
-        popup = leafpop::popupTable(dplyr::mutate_if(std_tcr_primary, is.numeric,
-                                                     round, digits = 2),
-                                    zcol = c("district", "students", "teachers", "std_tcr"),
-                                    row.numbers = FALSE, feature.id = FALSE))
-
-at <- seq(min(std_tcr_secondary$std_tcr, na.rm = TRUE), 
-          max(std_tcr_secondary$std_tcr, na.rm = TRUE), length.out = 5)
-mapview(std_tcr_secondary, zcol="std_tcr", col.regions = pal, at = at,
-        color = "#3b3b3b",
-        layer.name="Secondary - std:tcr",
-        highlight = leaflet::highlightOptions(weight = 4),
-        popup = leafpop::popupTable(dplyr::mutate_if(std_tcr_secondary, is.numeric,
-                                                     round, digits = 2),
-                                    zcol = c("district", "students", "teachers", "std_tcr"),
-                                    row.numbers = FALSE, feature.id = FALSE))
-# Putatan NA <= only 1 primary school, 0 secondary
-
-at <- c(0,0.5,1,2,3,4,5)
-mapview(brn_mkm_sch_sf, zcol="SIR", col.region=pal, at=at, layer.name="SIR") # bad, overhighlihts, since low school count
-
-m1 <- mapview(brn_mkm_sch_sf, zcol = "RA", col.region=pal, at=at)
-m2 <- mapview(brn_mkm_sch_sf, zcol = "hp", col.region=pal)
-at <- c(0,100,1000,10000,20000)
-m3 <- mapview(brn_mkm_sch_sf, zcol = "population", col.region=pal, at=at)
-leafsync::sync(m1, m2, m3)
-
-at <- c(0,0.25,0.5,0.75,1)
-mapview(brn_mkm_sch_sf, zcol = "exc", col.region=pal, at=at, 
-        layer.name="Exceedance Probability RA < 0.8")
-```
 
 ## Discussion & Limitation
 
 There are significantly fewer schools in Mukim xxx, when explored, its not forested area. Housing region, some may be newer nieghbourhood so.. good idea for mroe schools there, nearer from home, less transportation cost, environmental, time. 
 
+Given that Brunei has higher PISA scores than Malaysia, it would be interesting to explore whether accessibility may be a potential factor. / Malaysia has more population than Brunei, how does the school compare
+
 Limitation:
-only public schools, age groups, 2018 data, school types, 
+only public schools, to consider private schools
+age groups, 2018 data, school types, 
 some simulation in housing price,
 house price is listing price (only a proxy for market values), may deviate from actual sales price due to negotian dynamics and other factors
 ## Conclusions {#sec-conc}

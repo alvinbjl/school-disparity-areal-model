@@ -20,9 +20,11 @@ format:
     number-sections: true
     comments:
       hypothesis: true
-  
+
   pdf:
-    default
+    documentclass: article
+    fontsize: 12pt
+    geometry: margin=2cm
 
   docx: 
     link-citations: true
