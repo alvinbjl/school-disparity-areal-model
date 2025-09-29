@@ -8,3 +8,6 @@ school-areal-model.Rproj
 site_libs
 freeze
 _freeze
+
+# sites
+docs/

@@ -134,7 +134,7 @@ window.Quarto = {
                 <div>
             <div class="quarto-title-meta-heading">Modified</div>
             <div class="quarto-title-meta-contents">
-              <p class="date-modified">September 25, 2025</p>
+              <p class="date-modified">September 29, 2025</p>
             </div>
           </div>
                 
@@ -153,7 +153,7 @@ window.Quarto = {
 
 
     <div class="quarto-other-links-text-target">
-    <div class="quarto-code-links"><div class="quarto-title-meta-heading">Code Links</div><div class="quarto-title-meta-contents"><span><a href="https://github.com/alvinbjl/school-areal-model/" target="_blank"><i class="bi bi-github"></i>GitHub Repo</a></span></div></div></div>  </div>
+    <div class="quarto-code-links"><div class="quarto-title-meta-heading">Code Links</div><div class="quarto-title-meta-contents"><span><a href="https://github.com/alvinbjl/school-disparity-areal-model/" target="_blank"><i class="bi bi-github"></i>GitHub Repo</a></span></div></div></div>  </div>
 </header><div id="quarto-content" class="page-columns page-rows-contents page-layout-article toc-left">
 <div id="quarto-sidebar-toc-left" class="sidebar toc-left">
   <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="2">
@@ -166,12 +166,19 @@ window.Quarto = {
   <li><a href="#brunei" id="toc-brunei" class="nav-link" data-scroll-target="#brunei"><span class="header-section-number">2.1</span> Brunei</a></li>
   <li><a href="#malaysia" id="toc-malaysia" class="nav-link" data-scroll-target="#malaysia"><span class="header-section-number">2.2</span> Malaysia</a></li>
   </ul></li>
-  <li><a href="#sec-method" id="toc-sec-method" class="nav-link" data-scroll-target="#sec-method"><span class="header-section-number">3</span> Method</a></li>
+  <li><a href="#sec-method" id="toc-sec-method" class="nav-link" data-scroll-target="#sec-method"><span class="header-section-number">3</span> Method</a>
+  <ul class="collapse">
+  <li><a href="#spatial-regression-model" id="toc-spatial-regression-model" class="nav-link" data-scroll-target="#spatial-regression-model"><span class="header-section-number">3.1</span> Spatial regression model</a></li>
+  </ul></li>
   <li><a href="#sec-results" id="toc-sec-results" class="nav-link" data-scroll-target="#sec-results"><span class="header-section-number">4</span> Results</a>
   <ul class="collapse">
   <li><a href="#model" id="toc-model" class="nav-link" data-scroll-target="#model"><span class="header-section-number">4.1</span> Model</a></li>
   </ul></li>
-  <li><a href="#discussion-limitation" id="toc-discussion-limitation" class="nav-link" data-scroll-target="#discussion-limitation"><span class="header-section-number">5</span> Discussion &amp; Limitation</a></li>
+  <li><a href="#discussion-limitation" id="toc-discussion-limitation" class="nav-link" data-scroll-target="#discussion-limitation"><span class="header-section-number">5</span> Discussion &amp; Limitation</a>
+  <ul class="collapse">
+  <li><a href="#limitations" id="toc-limitations" class="nav-link" data-scroll-target="#limitations"><span class="header-section-number">5.1</span> Limitations</a></li>
+  </ul></li>
+  <li><a href="#sec-conc" id="toc-sec-conc" class="nav-link" data-scroll-target="#sec-conc"><span class="header-section-number">6</span> Conclusions</a></li>
   <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
   </ul>
 </nav>
@@ -216,75 +223,44 @@ window.Quarto = {
 <section id="sec-method" class="level2" data-number="3">
 <h2 data-number="3" class="anchored" data-anchor-id="sec-method"><span class="header-section-number">3</span> Method</h2>
 <p>Exploratory data anlysis using Clorepath maps for schools count, by area (usingst_area) studnet teacher ratio</p>
-<p>Neighbour type</p>
-<p>POisson INLA hierarchical model</p>
-<p>covariates: house price as socio economic index</p>
-<p>Spatial Poisson model Justify offset (population) Explain fixed and random effects Introduce INLA + BYM</p>
+<section id="spatial-regression-model" class="level3" data-number="3.1">
+<h3 data-number="3.1" class="anchored" data-anchor-id="spatial-regression-model"><span class="header-section-number">3.1</span> Spatial regression model</h3>
+<p>Let <span class="math inline">\(Y_i\)</span> and <span class="math inline">\(E_i\)</span> denote the observed and expected counts of schools, respectively, in mukim <span class="math inline">\(i \in \{1, \dotsc, n\}\)</span>. Let <span class="math inline">\(\theta_i\)</span> represent the <em>relative abundance</em> of schools in mukim <span class="math inline">\(i\)</span>, analogous to a relative risk in disease mapping. The model is specified as follow:</p>
+<p><span class="math display">\[
+Y_i \mid \theta_i \sim \text{Poisson}(E_i \cdot \theta_i), \quad i = 1, \dotsc, n
+\]</span></p>
+<p><span class="math display">\[
+\log(\theta_i) = \beta_0 + \beta_1 \cdot \text{pop}_i + \beta_2 \cdot \text{area}_i + \beta_3 \cdot \text{hp}_i + u_i + v_i
+\]</span></p>
+<p>Where:</p>
+<ul>
+<li><span class="math inline">\(\beta_0\)</span> is the intercept,</li>
+<li><span class="math inline">\(\beta_1\)</span>, <span class="math inline">\(\beta_2\)</span>, and <span class="math inline">\(\beta_3\)</span> are regression coefficients for the standardized covariates:
+<ul>
+<li><span class="math inline">\(\text{pop}_i\)</span>: population (in units of 10,000),</li>
+<li><span class="math inline">\(\text{area}_i\)</span>: mukim size (in units of 10 km²),</li>
+<li><span class="math inline">\(\text{hp}_i\)</span>: median house price (in BND $1,000,000),</li>
+</ul></li>
+<li><span class="math inline">\(u_i\)</span> is a structured spatial effect, modelled using an intrinsic conditional autoregressive (CAR) prior <span class="math inline">\(u_i \mid u_{-i} \sim \mathcal{N}(\bar{u}_{\delta_i}, \frac{1}{\tau_u n_{\delta_i}})\)</span></li>
+<li><span class="math inline">\(v_i\)</span> is an unstructured random effect, <span class="math inline">\(v_i \sim \text{Normal}(0, \frac{1}{\tau_v})\)</span></li>
+</ul>
+<p>The spatial random effect <span class="math inline">\(u_i\)</span> requires a neighborhood (adjacency) matrix. Here, We define two mukims as neighbors if they share at least one boundary point (Queen contiguity). The neighborhood graph is constructed using the <code>poly2nb()</code> function from the <code>spdep</code> package. Model fitting was performed in a Bayesian framework using the Integrated Nested Laplace Approximation (INLA).</p>
+</section>
 </section>
 <section id="sec-results" class="level2" data-number="4">
 <h2 data-number="4" class="anchored" data-anchor-id="sec-results"><span class="header-section-number">4</span> Results</h2>
-<div class="cell">
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><a href="index_files/figure-html/unnamed-chunk-1-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1"><img src="index_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></a></p>
-</figure>
-</div>
-</div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><a href="index_files/figure-html/unnamed-chunk-1-2.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2"><img src="index_files/figure-html/unnamed-chunk-1-2.png" class="img-fluid figure-img" width="672"></a></p>
-</figure>
-</div>
-</div>
-</div>
-<ul>
-<li>School count quite similar, more in main city</li>
-</ul>
-<div class="cell">
-<div class="cell-output cell-output-stdout">
-<pre><code>character(0)</code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] "Matu"     "Pakan"    "Selangau"</code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>character(0)</code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] "Matu"     "Pakan"    "Selangau"</code></pre>
-</div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><a href="index_files/figure-html/unnamed-chunk-2-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3"><img src="index_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="672"></a></p>
-</figure>
-</div>
-</div>
-</div>
-<ul>
-<li>studnet teacher ratio, primary simiilar other than dense city (miri, kuching, kota kinabalu), but brunei has lesser secondary std-tcr]</li>
-</ul>
+<!-- - School count quite similar, more in main city -->
+<!-- - studnet teacher ratio, primary simiilar other than dense city (miri, kuching, kota kinabalu), but brunei has lesser secondary std-tcr] -->
 <section id="model" class="level3" data-number="4.1">
 <h3 data-number="4.1" class="anchored" data-anchor-id="model"><span class="header-section-number">4.1</span> Model</h3>
+<p>The model results show that the intercept is estimated at <span class="math inline">\(\hat{\beta}_0 = 1.077\)</span>, with a 95% credible interval of <span class="math inline">\((0.239, 1.894)\)</span>. The coefficient for population, <span class="math inline">\(\beta_1 = -0.436\)</span>, with a 95% credible interval of <span class="math inline">\((-0.579, -0.295)\)</span>, indicates a statistically significant negative relationship between population size and relative school abundance. Specifically, for every 10,000 increase in population, the relative abundance of schools decreases by approximately 35%, since <span class="math inline">\(\exp(-0.436) \approx 0.647\)</span>. In contrast, the covariates: mukim size and house price are not statistically significant. The coefficient for mukim size is <span class="math inline">\(\hat{\beta_2}=0.015\)</span> (95% CI: -0.002, 0.032), and for house price is <span class="math inline">\(\hat{\beta_3}=-0.759\)</span> (95% CI: -3.174, 1.704).</p>
+<p>The estimated relative abundance (RA) of schools across mukims indicates lower values in the northern coastal mukims, particularly in northern Brunei-Muara District, along the South China Sea. Conversely, higher RA values appear inland, especially in less densely populated regions.</p>
+<p>To identify mukims with potentially inadequate school provision, non-exceedence probabilities were computed for a threshold of <span class="math inline">\(RA &lt;0.7\)</span>. The analysis indicates that it is highly likely that several mukims fall below this threshold, including Mukim Sengkurong, Mukim Gadong A, Mukim Gadong B, Mukim Berakas B, and Mukim Mentiri.</p>
 <div class="cell">
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><a href="index_files/figure-html/unnamed-chunk-4-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-4"><img src="index_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="672"></a></p>
-</figure>
-</div>
-</div>
-</div>
-<ul>
-<li>There are significantly fewer schools in Mukim xxx</li>
-</ul>
-<div class="cell">
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><a href="index_files/figure-html/unnamed-chunk-6-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-5"><img src="index_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></a></p>
+<p><a href="index_files/figure-html/unnamed-chunk-6-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1"><img src="index_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></a></p>
 </figure>
 </div>
 </div>
@@ -293,26 +269,29 @@ window.Quarto = {
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><a href="index_files/figure-html/unnamed-chunk-7-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-6"><img src="index_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="672"></a></p>
+<p><a href="index_files/figure-html/unnamed-chunk-7-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2"><img src="index_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="672"></a></p>
 </figure>
 </div>
 </div>
 </div>
-<ul>
-<li>Coefficient , sginificance</li>
-</ul>
 </section>
 </section>
 <section id="discussion-limitation" class="level2" data-number="5">
 <h2 data-number="5" class="anchored" data-anchor-id="discussion-limitation"><span class="header-section-number">5</span> Discussion &amp; Limitation</h2>
-<p>There are significantly fewer schools in Mukim xxx, when explored, its not forested area. Housing region, some may be newer nieghbourhood so.. good idea for mroe schools there, nearer from home, less transportation cost, environmental, time.</p>
-<p>Given that Brunei has higher PISA scores than Malaysia, it would be interesting to explore whether accessibility may be a potential factor. / Malaysia has more population than Brunei, how does the school compare</p>
-<p>Limitation: only public schools, to consider private schools age groups, 2018 data, school types, some simulation in housing price, house price is listing price (only a proxy for market values), may deviate from actual sales price due to negotian dynamics and other factors ## Conclusions {#sec-conc}</p>
-<ul>
-<li>School count quite similar, more in main city</li>
-<li>studnet teacher ratio, primary simiilar other than dense city (miri, kuching, kota kinabalu), but brunei has lesser secondary std-tcr</li>
-<li>There are significantly fewer schools in Mukim xxx</li>
-</ul>
+<p>The negative relationship between population and school counts, as well as higher RA values in inland (rural) mukims than coastal ares with larger population suggests that school availability in rural mukims seem to be adequate, potentially due to legacy planning policies or intentional efforts to ensure equitable access in remote areas.</p>
+<p>In contrast, urban and peri-urban mukims in the Brunei-Muara District, the country’s most densely populated and economically active region, show signs of disparities in school access. Notably, the high non-exceedance probability of <span class="math inline">\(RA &lt; 0.7\)</span> in <strong>Mukim Sengkurong, Gadong A &amp; B, Berakas B, and Mentiri</strong> indicates that they have fewer schools than expected relative to their population sizes. These disparities highlight areas that may be underinvested in educational infrastructure, warranting closer policy attention.</p>
+<p>Importantly, these mukims are also encompass several new government housing developments, such as Perpindahan Lugu and Perpindahan Tanah Jambu. This suggests a potential planning gap, where population is increasing due to housing developments, but educational infrastructure has not yet caught up.</p>
+<p>However, inspection of the Choropleth map of school counts per mukim reveals that these areas have a similar number of schools compared to their neighboring mukims. This suggests that while the absolute number of schools may not be unusually low, the rapid increase in population within these new housing areas may have outpaced school capacity, leading to a situation where demand exceeds supply within these specific zones.</p>
+<p>Nevertheless, this situation represents a strategic opportunity. Prioritizing school construction in these fast-growing neighborhoods could significantly improve access to education, reduce commute times, lower transportation costs, and enhance the overall quality of life for residents. Locating schools closer to homes supports national goals related to sustainable urban development, walkability, and equity in public services.</p>
+<!-- Given that Brunei has higher PISA scores than Malaysia, it would be interesting to explore whether accessibility may be a potential factor. / Malaysia has more population than Brunei, how does the school compare -->
+<section id="limitations" class="level3" data-number="5.1">
+<h3 data-number="5.1" class="anchored" data-anchor-id="limitations"><span class="header-section-number">5.1</span> Limitations</h3>
+<p>This study is limited to public schools, excluding private and international institutions that may affect school availability in some areas. The data is from 2018, potentially missing recent changes, especially in fast-growing neighborhoods. It also does not account for school types (e.g., primary vs.&nbsp;secondary) or age-specific population data, which are important for demand estimation. Housing price was used as a proxy for socioeconomic status, but data relies on listing prices, which may not reflect actual market values due to negotiation factors. In some areas, price data was also simulated, introducing further uncertainty.</p>
+</section>
+</section>
+<section id="sec-conc" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="sec-conc"><span class="header-section-number">6</span> Conclusions</h2>
+<p>In summary, the analysis reveals a negative relationship between population size and relative school abundance, suggesting urban areas have fewer schools per capita than rural ones. Several mukims in the Brunei-Muara District, including Sengkurong, Gadong A &amp; B, Berakas B, and Mentiri, appear to have fewer schools than expected, despite ongoing population growth driven by new housing developments. While total school counts may seem adequate, local demand in these areas may exceed capacity. Addressing this gap offers a strategic opportunity to improve access, reduce travel time, and support equitable urban planning.</p>
 </section>
 <section id="references" class="level2 unnumbered">
 <h2 class="unnumbered anchored" data-anchor-id="references">References</h2>

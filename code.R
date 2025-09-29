@@ -662,9 +662,9 @@ g <- inla.read.graph(filename = "map.adj")
 brn_mkm_sch_sf$re_u <- 1:nrow(brn_mkm_sch_sf)
 brn_mkm_sch_sf <- brn_mkm_sch_sf %>%
   mutate(
-    pop_s = population / 1000,   # per 1000 people
-    area_s = as.numeric(area) / 1000000,  # e.g., km^2 instead of m^2
-    hp_s = hp / 1000              # per 1000 currency units
+    pop_s = population / 10000,   # per 10000 people
+    area_s = as.numeric(area) / 10000000,  # e.g., 10 km^2 instead of m^2
+    hp_s = hp / 1000000              # per million $
   )
 
 formula <- Y ~ pop_s + area_s + hp_s + f(re_u, model = "bym2", graph = g)
@@ -720,7 +720,7 @@ ggplot() +
 
 # Use Exceedance Prob.
 brn_mkm_sch_sf$exc <- sapply(res$marginals.fitted.values,
-                    FUN = function(marg){inla.pmarginal(q = 0.75, marginal = marg)})
+                    FUN = function(marg){inla.pmarginal(q = 0.7, marginal = marg)})
 
 at <- c(0,0.25,0.5,0.75,1)
 mapview(brn_mkm_sch_sf, zcol = "exc", col.region=pal, at=at, 
@@ -755,7 +755,17 @@ ggplot() +
   theme_minimal() +
   theme(legend.position = "top")
 
+brn_mkm_sch_sf$exc2 <- sapply(res$marginals.fitted.values,
+                             FUN = function(marg){1 - inla.pmarginal(q = 1, marginal = marg)})
 
+at <- c(0,0.25,0.5,0.75,1)
+mapview(brn_mkm_sch_sf, zcol = "exc2", col.region=pal, at=at, 
+        layer.name="Exceedance Probability RA > 1.2")
+
+
+# Visualize both layers together
+mapview(mkm_sf, layer.name = "MKMs", alpha.regions = 0, color = "black") +
+  mapview(brn_mkm_sch_sf , zcol = "schools")
 
 
 

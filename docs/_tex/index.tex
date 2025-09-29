@@ -5,10 +5,10 @@
 \PassOptionsToPackage{dvipsnames,svgnames,x11names}{xcolor}
 %
 \documentclass[
-  letterpaper,
-  DIV=11,
-  numbers=noendperiod]{scrartcl}
+  12pt,
+]{article}
 \usepackage{xcolor}
+\usepackage[margin=2cm]{geometry}
 \usepackage{amsmath,amssymb}
 \setcounter{secnumdepth}{-\maxdimen} % remove section numbering
 \usepackage{iftex}
@@ -106,7 +106,6 @@
  
 
 
-\KOMAoption{captions}{tableheading}
 \makeatletter
 \@ifpackageloaded{caption}{}{\usepackage{caption}}
 \AtBeginDocument{%
@@ -281,99 +280,152 @@ affected areas to the nearest valid district.
 Exploratory data anlysis using Clorepath maps for schools count, by area
 (usingst\_area) studnet teacher ratio
 
-Neighbour type
+\subsubsection{Spatial regression model}\label{spatial-regression-model}
 
-POisson INLA hierarchical model
+Let \(Y_i\) and \(E_i\) denote the observed and expected counts of
+schools, respectively, in mukim \(i \in \{1, \dotsc, n\}\). Let
+\(\theta_i\) represent the \emph{relative abundance} of schools in mukim
+\(i\), analogous to a relative risk in disease mapping. The model is
+specified as follow:
 
-covariates: house price as socio economic index
+\[
+Y_i \mid \theta_i \sim \text{Poisson}(E_i \cdot \theta_i), \quad i = 1, \dotsc, n
+\]
 
-Spatial Poisson model Justify offset (population) Explain fixed and
-random effects Introduce INLA + BYM
+\[
+\log(\theta_i) = \beta_0 + \beta_1 \cdot \text{pop}_i + \beta_2 \cdot \text{area}_i + \beta_3 \cdot \text{hp}_i + u_i + v_i
+\]
+
+Where:
+
+\begin{itemize}
+\tightlist
+\item
+  \(\beta_0\) is the intercept,
+\item
+  \(\beta_1\), \(\beta_2\), and \(\beta_3\) are regression coefficients
+  for the standardized covariates:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \(\text{pop}_i\): population (in units of 10,000),
+  \item
+    \(\text{area}_i\): mukim size (in units of 10 km²),
+  \item
+    \(\text{hp}_i\): median house price (in BND \$1,000,000),
+  \end{itemize}
+\item
+  \(u_i\) is a structured spatial effect, modelled using an intrinsic
+  conditional autoregressive (CAR) prior
+  \(u_i \mid u_{-i} \sim \mathcal{N}(\bar{u}_{\delta_i}, \frac{1}{\tau_u n_{\delta_i}})\)
+\item
+  \(v_i\) is an unstructured random effect,
+  \(v_i \sim \text{Normal}(0, \frac{1}{\tau_v})\)
+\end{itemize}
+
+The spatial random effect \(u_i\) requires a neighborhood (adjacency)
+matrix. Here, We define two mukims as neighbors if they share at least
+one boundary point (Queen contiguity). The neighborhood graph is
+constructed using the \texttt{poly2nb()} function from the
+\texttt{spdep} package. Model fitting was performed in a Bayesian
+framework using the Integrated Nested Laplace Approximation (INLA).
 
 \subsection{Results}\label{sec-results}
 
-\pandocbounded{\includegraphics[keepaspectratio]{index_files/figure-pdf/unnamed-chunk-1-1.pdf}}
-
-\pandocbounded{\includegraphics[keepaspectratio]{index_files/figure-pdf/unnamed-chunk-1-2.pdf}}
-
-\begin{itemize}
-\tightlist
-\item
-  School count quite similar, more in main city
-\end{itemize}
-
-\begin{verbatim}
-character(0)
-\end{verbatim}
-
-\begin{verbatim}
-[1] "Matu"     "Pakan"    "Selangau"
-\end{verbatim}
-
-\begin{verbatim}
-character(0)
-\end{verbatim}
-
-\begin{verbatim}
-[1] "Matu"     "Pakan"    "Selangau"
-\end{verbatim}
-
-\pandocbounded{\includegraphics[keepaspectratio]{index_files/figure-pdf/unnamed-chunk-2-1.pdf}}
-
-\begin{itemize}
-\tightlist
-\item
-  studnet teacher ratio, primary simiilar other than dense city (miri,
-  kuching, kota kinabalu), but brunei has lesser secondary std-tcr{]}
-\end{itemize}
-
 \subsubsection{Model}\label{model}
 
-\pandocbounded{\includegraphics[keepaspectratio]{index_files/figure-pdf/unnamed-chunk-4-1.pdf}}
+The model results show that the intercept is estimated at
+\(\hat{\beta}_0 = 1.077\), with a 95\% credible interval of
+\((0.239, 1.894)\). The coefficient for population,
+\(\beta_1 = -0.436\), with a 95\% credible interval of
+\((-0.579, -0.295)\), indicates a statistically significant negative
+relationship between population size and relative school abundance.
+Specifically, for every 10,000 increase in population, the relative
+abundance of schools decreases by approximately 35\%, since
+\(\exp(-0.436) \approx 0.647\). In contrast, the covariates: mukim size
+and house price are not statistically significant. The coefficient for
+mukim size is \(\hat{\beta_2}=0.015\) (95\% CI: -0.002, 0.032), and for
+house price is \(\hat{\beta_3}=-0.759\) (95\% CI: -3.174, 1.704).
 
-\begin{itemize}
-\tightlist
-\item
-  There are significantly fewer schools in Mukim xxx
-\end{itemize}
+The estimated relative abundance (RA) of schools across mukims indicates
+lower values in the northern coastal mukims, particularly in northern
+Brunei-Muara District, along the South China Sea. Conversely, higher RA
+values appear inland, especially in less densely populated regions.
+
+To identify mukims with potentially inadequate school provision,
+non-exceedence probabilities were computed for a threshold of
+\(RA <0.7\). The analysis indicates that it is highly likely that
+several mukims fall below this threshold, including Mukim Sengkurong,
+Mukim Gadong A, Mukim Gadong B, Mukim Berakas B, and Mukim Mentiri.
 
 \pandocbounded{\includegraphics[keepaspectratio]{index_files/figure-pdf/unnamed-chunk-6-1.pdf}}
 
 \pandocbounded{\includegraphics[keepaspectratio]{index_files/figure-pdf/unnamed-chunk-7-1.pdf}}
 
-\begin{itemize}
-\tightlist
-\item
-  Coefficient , sginificance
-\end{itemize}
-
 \subsection{Discussion \& Limitation}\label{discussion-limitation}
 
-There are significantly fewer schools in Mukim xxx, when explored, its
-not forested area. Housing region, some may be newer nieghbourhood so..
-good idea for mroe schools there, nearer from home, less transportation
-cost, environmental, time.
+The negative relationship between population and school counts, as well
+as higher RA values in inland (rural) mukims than coastal ares with
+larger population suggests that school availability in rural mukims seem
+to be adequate, potentially due to legacy planning policies or
+intentional efforts to ensure equitable access in remote areas.
 
-Given that Brunei has higher PISA scores than Malaysia, it would be
-interesting to explore whether accessibility may be a potential factor.
-/ Malaysia has more population than Brunei, how does the school compare
+In contrast, urban and peri-urban mukims in the Brunei-Muara District,
+the country's most densely populated and economically active region,
+show signs of disparities in school access. Notably, the high
+non-exceedance probability of \(RA < 0.7\) in \textbf{Mukim Sengkurong,
+Gadong A \& B, Berakas B, and Mentiri} indicates that they have fewer
+schools than expected relative to their population sizes. These
+disparities highlight areas that may be underinvested in educational
+infrastructure, warranting closer policy attention.
 
-Limitation: only public schools, to consider private schools age groups,
-2018 data, school types, some simulation in housing price, house price
-is listing price (only a proxy for market values), may deviate from
-actual sales price due to negotian dynamics and other factors \#\#
-Conclusions \{\#sec-conc\}
+Importantly, these mukims are also encompass several new government
+housing developments, such as Perpindahan Lugu and Perpindahan Tanah
+Jambu. This suggests a potential planning gap, where population is
+increasing due to housing developments, but educational infrastructure
+has not yet caught up.
 
-\begin{itemize}
-\tightlist
-\item
-  School count quite similar, more in main city
-\item
-  studnet teacher ratio, primary simiilar other than dense city (miri,
-  kuching, kota kinabalu), but brunei has lesser secondary std-tcr
-\item
-  There are significantly fewer schools in Mukim xxx
-\end{itemize}
+However, inspection of the Choropleth map of school counts per mukim
+reveals that these areas have a similar number of schools compared to
+their neighboring mukims. This suggests that while the absolute number
+of schools may not be unusually low, the rapid increase in population
+within these new housing areas may have outpaced school capacity,
+leading to a situation where demand exceeds supply within these specific
+zones.
+
+Nevertheless, this situation represents a strategic opportunity.
+Prioritizing school construction in these fast-growing neighborhoods
+could significantly improve access to education, reduce commute times,
+lower transportation costs, and enhance the overall quality of life for
+residents. Locating schools closer to homes supports national goals
+related to sustainable urban development, walkability, and equity in
+public services.
+
+\subsubsection{Limitations}\label{limitations}
+
+This study is limited to public schools, excluding private and
+international institutions that may affect school availability in some
+areas. The data is from 2018, potentially missing recent changes,
+especially in fast-growing neighborhoods. It also does not account for
+school types (e.g., primary vs.~secondary) or age-specific population
+data, which are important for demand estimation. Housing price was used
+as a proxy for socioeconomic status, but data relies on listing prices,
+which may not reflect actual market values due to negotiation factors.
+In some areas, price data was also simulated, introducing further
+uncertainty.
+
+\subsection{Conclusions}\label{sec-conc}
+
+In summary, the analysis reveals a negative relationship between
+population size and relative school abundance, suggesting urban areas
+have fewer schools per capita than rural ones. Several mukims in the
+Brunei-Muara District, including Sengkurong, Gadong A \& B, Berakas B,
+and Mentiri, appear to have fewer schools than expected, despite ongoing
+population growth driven by new housing developments. While total school
+counts may seem adequate, local demand in these areas may exceed
+capacity. Addressing this gap offers a strategic opportunity to improve
+access, reduce travel time, and support equitable urban planning.
 
 \subsection*{References}\label{references}
 \addcontentsline{toc}{subsection}{References}

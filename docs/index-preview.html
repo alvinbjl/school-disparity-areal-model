@@ -234,7 +234,7 @@
                 <div>
             <div class="quarto-title-meta-heading">Modified</div>
             <div class="quarto-title-meta-contents">
-              <p class="date-modified">September 25, 2025</p>
+              <p class="date-modified">September 29, 2025</p>
             </div>
           </div>
                 
@@ -266,12 +266,19 @@
   <li><a href="#brunei" id="toc-brunei" class="nav-link" data-scroll-target="#brunei"><span class="header-section-number">2.1</span> Brunei</a></li>
   <li><a href="#malaysia" id="toc-malaysia" class="nav-link" data-scroll-target="#malaysia"><span class="header-section-number">2.2</span> Malaysia</a></li>
   </ul></li>
-  <li><a href="#sec-method" id="toc-sec-method" class="nav-link" data-scroll-target="#sec-method"><span class="header-section-number">3</span> Method</a></li>
+  <li><a href="#sec-method" id="toc-sec-method" class="nav-link" data-scroll-target="#sec-method"><span class="header-section-number">3</span> Method</a>
+  <ul class="collapse">
+  <li><a href="#spatial-regression-model" id="toc-spatial-regression-model" class="nav-link" data-scroll-target="#spatial-regression-model"><span class="header-section-number">3.1</span> Spatial regression model</a></li>
+  </ul></li>
   <li><a href="#sec-results" id="toc-sec-results" class="nav-link" data-scroll-target="#sec-results"><span class="header-section-number">4</span> Results</a>
   <ul class="collapse">
   <li><a href="#model" id="toc-model" class="nav-link" data-scroll-target="#model"><span class="header-section-number">4.1</span> Model</a></li>
   </ul></li>
-  <li><a href="#discussion-limitation" id="toc-discussion-limitation" class="nav-link" data-scroll-target="#discussion-limitation"><span class="header-section-number">5</span> Discussion &amp; Limitation</a></li>
+  <li><a href="#discussion-limitation" id="toc-discussion-limitation" class="nav-link" data-scroll-target="#discussion-limitation"><span class="header-section-number">5</span> Discussion &amp; Limitation</a>
+  <ul class="collapse">
+  <li><a href="#limitations" id="toc-limitations" class="nav-link" data-scroll-target="#limitations"><span class="header-section-number">5.1</span> Limitations</a></li>
+  </ul></li>
+  <li><a href="#sec-conc" id="toc-sec-conc" class="nav-link" data-scroll-target="#sec-conc"><span class="header-section-number">6</span> Conclusions</a></li>
   <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
   </ul>
 </nav>
@@ -617,10 +624,29 @@ date (1): date
 <section id="sec-method" class="level2" data-number="3">
 <h2 data-number="3" class="anchored" data-anchor-id="sec-method"><span class="header-section-number">3</span> Method</h2>
 <p>Exploratory data anlysis using Clorepath maps for schools count, by area (usingst_area) studnet teacher ratio</p>
-<p>Neighbour type</p>
-<p>POisson INLA hierarchical model</p>
-<p>covariates: house price as socio economic index</p>
-<p>Spatial Poisson model Justify offset (population) Explain fixed and random effects Introduce INLA + BYM</p>
+<section id="spatial-regression-model" class="level3" data-number="3.1">
+<h3 data-number="3.1" class="anchored" data-anchor-id="spatial-regression-model"><span class="header-section-number">3.1</span> Spatial regression model</h3>
+<p>Let <span class="math inline">\(Y_i\)</span> and <span class="math inline">\(E_i\)</span> denote the observed and expected counts of schools, respectively, in mukim <span class="math inline">\(i \in \{1, \dotsc, n\}\)</span>. Let <span class="math inline">\(\theta_i\)</span> represent the <em>relative abundance</em> of schools in mukim <span class="math inline">\(i\)</span>, analogous to a relative risk in disease mapping. The model is specified as follow:</p>
+<p><span class="math display">\[
+Y_i \mid \theta_i \sim \text{Poisson}(E_i \cdot \theta_i), \quad i = 1, \dotsc, n
+\]</span></p>
+<p><span class="math display">\[
+\log(\theta_i) = \beta_0 + \beta_1 \cdot \text{pop}_i + \beta_2 \cdot \text{area}_i + \beta_3 \cdot \text{hp}_i + u_i + v_i
+\]</span></p>
+<p>Where:</p>
+<ul>
+<li><span class="math inline">\(\beta_0\)</span> is the intercept,</li>
+<li><span class="math inline">\(\beta_1\)</span>, <span class="math inline">\(\beta_2\)</span>, and <span class="math inline">\(\beta_3\)</span> are regression coefficients for the standardized covariates:
+<ul>
+<li><span class="math inline">\(\text{pop}_i\)</span>: population (in units of 10,000),</li>
+<li><span class="math inline">\(\text{area}_i\)</span>: mukim size (in units of 10 km²),</li>
+<li><span class="math inline">\(\text{hp}_i\)</span>: median house price (in BND $1,000,000),</li>
+</ul></li>
+<li><span class="math inline">\(u_i\)</span> is a structured spatial effect, modelled using an intrinsic conditional autoregressive (CAR) prior <span class="math inline">\(u_i \mid u_{-i} \sim \mathcal{N}(\bar{u}_{\delta_i}, \frac{1}{\tau_u n_{\delta_i}})\)</span></li>
+<li><span class="math inline">\(v_i\)</span> is an unstructured random effect, <span class="math inline">\(v_i \sim \text{Normal}(0, \frac{1}{\tau_v})\)</span></li>
+</ul>
+<p>The spatial random effect <span class="math inline">\(u_i\)</span> requires a neighborhood (adjacency) matrix. Here, We define two mukims as neighbors if they share at least one boundary point (Queen contiguity). The neighborhood graph is constructed using the <code>poly2nb()</code> function from the <code>spdep</code> package. Model fitting was performed in a Bayesian framework using the Integrated Nested Laplace Approximation (INLA).</p>
+</section>
 </section>
 <section id="sec-results" class="level2" data-number="4">
 <h2 data-number="4" class="anchored" data-anchor-id="sec-results"><span class="header-section-number">4</span> Results</h2>
@@ -742,7 +768,7 @@ date (1): date
 <span id="cb36-115"><a href="#cb36-115" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span>
 <span id="cb36-116"><a href="#cb36-116" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb36-117"><a href="#cb36-117" aria-hidden="true" tabindex="-1"></a><span class="co"># 2x1 grid</span></span>
-<span id="cb36-118"><a href="#cb36-118" aria-hidden="true" tabindex="-1"></a>(m1 <span class="sc">|</span> m3) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb36-118"><a href="#cb36-118" aria-hidden="true" tabindex="-1"></a>m1 <span class="sc">/</span> m3 </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning in st_point_on_surface.sfc(sf::st_zm(x)): st_point_on_surface may not
 give correct results for longitude/latitude data
@@ -757,7 +783,7 @@ give correct results for longitude/latitude data</code></pre>
 </div>
 </div>
 <div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 2x1 gird</span></span>
-<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>(m2 <span class="sc">|</span> m4)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>m2 <span class="sc">/</span> m4</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning in st_point_on_surface.sfc(sf::st_zm(x)): st_point_on_surface may not
 give correct results for longitude/latitude data
@@ -772,9 +798,7 @@ give correct results for longitude/latitude data</code></pre>
 </div>
 </div>
 </div></div>
-<ul>
-<li>School count quite similar, more in main city</li>
-</ul>
+<!-- - School count quite similar, more in main city -->
 <div class="cell-container"><div class="cell-decorator"><pre>In [3]:</pre></div><div class="cell">
 <div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>brn_tchr <span class="ot">&lt;-</span> bruneimap<span class="sc">::</span>tchr <span class="sc">%&gt;%</span> </span>
 <span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">teachers =</span> <span class="fu">as.numeric</span>(M) <span class="sc">+</span> <span class="fu">as.numeric</span>(<span class="st">`</span><span class="at">F</span><span class="st">`</span>),</span>
@@ -994,9 +1018,7 @@ give correct results for longitude/latitude data</code></pre>
 </div>
 </div>
 </div></div>
-<ul>
-<li>studnet teacher ratio, primary simiilar other than dense city (miri, kuching, kota kinabalu), but brunei has lesser secondary std-tcr]</li>
-</ul>
+<!-- - studnet teacher ratio, primary simiilar other than dense city (miri, kuching, kota kinabalu), but brunei has lesser secondary std-tcr] -->
 <section id="model" class="level3" data-number="4.1">
 <h3 data-number="4.1" class="anchored" data-anchor-id="model"><span class="header-section-number">4.1</span> Model</h3>
 <div class="cell-container"><div class="cell-decorator"><pre>In [4]:</pre></div><div class="cell">
@@ -1061,11 +1083,11 @@ if this sub-graph count seems unexpected, try increasing the snap argument.</cod
 <span id="cb64-9"><a href="#cb64-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb64-10"><a href="#cb64-10" aria-hidden="true" tabindex="-1"></a>res<span class="sc">$</span>summary.fitted.values<span class="sc">$</span>mean <span class="co"># values too high for forested area</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code> [1] 12.31058 12.31397 12.55410 12.79899 12.34925 13.09716 12.14464 12.57048
- [9] 12.34605 12.32399 12.46060 12.53159 12.25047 12.57266 12.29277 12.84756
-[17] 12.62733 12.65971 12.65096 12.61556 12.54256 11.83581 12.61149 12.54250
-[25] 12.76547 12.61146 12.57078 12.54259 11.98371 12.37427 12.42108 12.33722
-[33] 12.42918 12.34599 13.09102 12.63982 12.66031 12.56034 12.87345</code></pre>
+<pre><code> [1] 12.31082 12.31420 12.55401 12.79898 12.34948 13.09714 12.14465 12.57047
+ [9] 12.34605 12.32400 12.46060 12.53157 12.25048 12.57257 12.29277 12.84756
+[17] 12.62717 12.65956 12.65082 12.61542 12.54256 11.83582 12.61149 12.54250
+[25] 12.76547 12.61146 12.57079 12.54260 11.98373 12.37456 12.42108 12.33723
+[33] 12.42918 12.34599 13.09100 12.63969 12.66031 12.56034 12.87344</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb66"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a>brn_mkm_sch_sf<span class="sc">$</span>PM <span class="ot">&lt;-</span> res<span class="sc">$</span>summary.fitted.values[, <span class="st">"mean"</span>]</span>
 <span id="cb66-2"><a href="#cb66-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -1077,318 +1099,320 @@ if this sub-graph count seems unexpected, try increasing the snap argument.</cod
 <span id="cb66-8"><a href="#cb66-8" aria-hidden="true" tabindex="-1"></a>marginals_summaries <span class="ot">&lt;-</span> <span class="fu">lapply</span>(marginals,</span>
 <span id="cb66-9"><a href="#cb66-9" aria-hidden="true" tabindex="-1"></a>                              <span class="at">FUN =</span> <span class="cf">function</span>(marg){<span class="fu">inla.zmarginal</span>(marg)})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Mean            241046 
-Stdev           99486.1 
-Quantile  0.025 93412.9 
-Quantile  0.25  171617 
-Quantile  0.5   225596 
-Quantile  0.75  291753 
-Quantile  0.975 480927 
-Mean            234193 
-Stdev           75752.9 
-Quantile  0.025 118806 
-Quantile  0.25  180306 
-Quantile  0.5   222923 
-Quantile  0.75  275223 
-Quantile  0.975 414546 
-Mean            296459 
-Stdev           91653.5 
-Quantile  0.025 155533 
-Quantile  0.25  231686 
-Quantile  0.5   283151 
-Quantile  0.75  345962 
-Quantile  0.975 514318 
-Mean            361870 
-Stdev           3706.27 
-Quantile  0.025 353680 
-Quantile  0.25  360099 
-Quantile  0.5   361881 
-Quantile  0.75  363646 
-Quantile  0.975 369888 
-Mean            240750 
-Stdev           72012.3 
-Quantile  0.025 130908 
-Quantile  0.25  189798 
-Quantile  0.5   229949 
-Quantile  0.75  279430 
-Quantile  0.975 412675 
-Mean            487578 
-Stdev           5009.03 
-Quantile  0.025 476012 
-Quantile  0.25  485276 
-Quantile  0.5   487729 
-Quantile  0.75  490070 
-Quantile  0.975 497895 
-Mean            188096 
-Stdev           1931.18 
-Quantile  0.025 184048 
-Quantile  0.25  187136 
-Quantile  0.5   188044 
-Quantile  0.75  188980 
-Quantile  0.975 192488 
-Mean            287947 
-Stdev           2947.43 
-Quantile  0.025 281445 
-Quantile  0.25  286536 
-Quantile  0.5   287953 
-Quantile  0.75  289357 
-Quantile  0.975 294333 
-Mean            230063 
-Stdev           2358.11 
-Quantile  0.025 225032 
-Quantile  0.25  228906 
+<pre><code>Mean            241120 
+Stdev           99535.7 
+Quantile  0.025 93321.2 
+Quantile  0.25  171674 
+Quantile  0.5   225690 
+Quantile  0.75  291860 
+Quantile  0.975 481057 
+Mean            234270 
+Stdev           75848.7 
+Quantile  0.025 118745 
+Quantile  0.25  180317 
+Quantile  0.5   222985 
+Quantile  0.75  275346 
+Quantile  0.975 414854 
+Mean            296436 
+Stdev           91671.2 
+Quantile  0.025 155491 
+Quantile  0.25  231660 
+Quantile  0.5   283124 
+Quantile  0.75  345932 
+Quantile  0.975 514356 
+Mean            361868 
+Stdev           3738.65 
+Quantile  0.025 353593 
+Quantile  0.25  360094 
+Quantile  0.5   361880 
+Quantile  0.75  363649 
+Quantile  0.975 369962 
+Mean            240823 
+Stdev           72097.8 
+Quantile  0.025 130889 
+Quantile  0.25  189813 
+Quantile  0.5   229996 
+Quantile  0.75  279532 
+Quantile  0.975 412981 
+Mean            487570 
+Stdev           5053.39 
+Quantile  0.025 475871 
+Quantile  0.25  485267 
+Quantile  0.5   487727 
+Quantile  0.75  490073 
+Quantile  0.975 497973 
+Mean            188097 
+Stdev           1948.3 
+Quantile  0.025 184013 
+Quantile  0.25  187135 
+Quantile  0.5   188045 
+Quantile  0.75  188983 
+Quantile  0.975 192538 
+Mean            287946 
+Stdev           2973.15 
+Quantile  0.025 281378 
+Quantile  0.25  286532 
+Quantile  0.5   287952 
+Quantile  0.75  289360 
+Quantile  0.975 294394 
+Mean            230064 
+Stdev           2378.84 
+Quantile  0.025 224985 
+Quantile  0.25  228903 
 Quantile  0.5   230023 
-Quantile  0.75  231160 
-Quantile  0.975 235341 
-Mean            225045 
-Stdev           2305.16 
-Quantile  0.025 220096 
-Quantile  0.25  223918 
+Quantile  0.75  231163 
+Quantile  0.975 235398 
+Mean            225046 
+Stdev           2325.37 
+Quantile  0.025 220050 
+Quantile  0.25  223916 
 Quantile  0.5   225013 
-Quantile  0.75  226123 
-Quantile  0.975 230175 
+Quantile  0.75  226125 
+Quantile  0.975 230229 
 Mean            257985 
-Stdev           2640.68 
-Quantile  0.025 252211 
-Quantile  0.25  256713 
+Stdev           2663.74 
+Quantile  0.025 252153 
+Quantile  0.25  256709 
 Quantile  0.5   257977 
-Quantile  0.75  259240 
-Quantile  0.975 263758 
-Mean            292748 
-Stdev           100825 
-Quantile  0.025 143213 
-Quantile  0.25  222123 
-Quantile  0.5   276482 
-Quantile  0.75  344441 
-Quantile  0.975 537290 
-Mean            209093 
-Stdev           2144.78 
-Quantile  0.025 204575 
-Quantile  0.25  208031 
+Quantile  0.75  259242 
+Quantile  0.975 263816 
+Mean            292745 
+Stdev           100846 
+Quantile  0.025 143194 
+Quantile  0.25  222121 
+Quantile  0.5   276474 
+Quantile  0.75  344423 
+Quantile  0.975 537360 
+Mean            209095 
+Stdev           2163.71 
+Quantile  0.025 204536 
+Quantile  0.25  208029 
 Quantile  0.5   209042 
-Quantile  0.75  210080 
-Quantile  0.975 213950 
-Mean            305255 
-Stdev           106308 
-Quantile  0.025 149450 
-Quantile  0.25  230886 
-Quantile  0.5   287516 
-Quantile  0.75  359001 
-Quantile  0.975 564681 
-Mean            218127 
-Stdev           2240.02 
-Quantile  0.025 213454 
-Quantile  0.25  217010 
+Quantile  0.75  210083 
+Quantile  0.975 214004 
+Mean            305234 
+Stdev           106335 
+Quantile  0.025 149422 
+Quantile  0.25  230865 
+Quantile  0.5   287484 
+Quantile  0.75  358958 
+Quantile  0.975 564762 
+Mean            218129 
+Stdev           2259.88 
+Quantile  0.025 213414 
+Quantile  0.25  217008 
 Quantile  0.5   218061 
-Quantile  0.75  219149 
-Quantile  0.975 223242 
-Mean            379882 
-Stdev           3889.3 
-Quantile  0.025 371229 
-Quantile  0.25  378034 
-Quantile  0.5   379910 
-Quantile  0.75  381758 
-Quantile  0.975 388234 
-Mean            317044 
-Stdev           90562.7 
-Quantile  0.025 173389 
-Quantile  0.25  253039 
-Quantile  0.5   305315 
-Quantile  0.75  367528 
-Quantile  0.975 528556 
-Mean            329967 
-Stdev           103903 
-Quantile  0.025 171858 
-Quantile  0.25  256398 
-Quantile  0.5   314332 
-Quantile  0.75  385696 
-Quantile  0.975 578277 
-Mean            325534 
-Stdev           96401.1 
-Quantile  0.025 174511 
-Quantile  0.25  257178 
-Quantile  0.5   312439 
-Quantile  0.75  378916 
-Quantile  0.975 552019 
-Mean            314232 
-Stdev           93417.4 
-Quantile  0.025 168882 
-Quantile  0.25  248179 
-Quantile  0.5   301194 
-Quantile  0.75  365336 
-Quantile  0.975 534882 
-Mean            280021 
-Stdev           2866.65 
-Quantile  0.025 273816 
-Quantile  0.25  278629 
+Quantile  0.75  219152 
+Quantile  0.975 223301 
+Mean            379880 
+Stdev           3923.25 
+Quantile  0.025 371135 
+Quantile  0.25  378029 
+Quantile  0.5   379909 
+Quantile  0.75  381761 
+Quantile  0.975 388310 
+Mean            317008 
+Stdev           90598.6 
+Quantile  0.025 173292 
+Quantile  0.25  252983 
+Quantile  0.5   305279 
+Quantile  0.75  367507 
+Quantile  0.975 528602 
+Mean            329941 
+Stdev           103978 
+Quantile  0.025 171764 
+Quantile  0.25  256326 
+Quantile  0.5   314280 
+Quantile  0.75  385682 
+Quantile  0.975 578481 
+Mean            325506 
+Stdev           96460.2 
+Quantile  0.025 174406 
+Quantile  0.25  257110 
+Quantile  0.5   312399 
+Quantile  0.75  378912 
+Quantile  0.975 552142 
+Mean            314200 
+Stdev           93452.3 
+Quantile  0.025 168804 
+Quantile  0.25  248129 
+Quantile  0.5   301155 
+Quantile  0.75  365310 
+Quantile  0.975 534949 
+Mean            280022 
+Stdev           2891.7 
+Quantile  0.025 273756 
+Quantile  0.25  278626 
 Quantile  0.5   279996 
-Quantile  0.75  281372 
-Quantile  0.975 286351 
-Mean            138120 
-Stdev           1423.31 
-Quantile  0.025 135217 
-Quantile  0.25  137400 
+Quantile  0.75  281375 
+Quantile  0.975 286415 
+Mean            138122 
+Stdev           1436.17 
+Quantile  0.025 135195 
+Quantile  0.25  137399 
 Quantile  0.5   138061 
-Quantile  0.75  138756 
-Quantile  0.975 141432 
+Quantile  0.75  138759 
+Quantile  0.975 141473 
 Mean            300003 
-Stdev           3070.94 
-Quantile  0.025 293323 
-Quantile  0.25  298517 
+Stdev           3097.75 
+Quantile  0.025 293257 
+Quantile  0.25  298514 
 Quantile  0.5   299985 
-Quantile  0.75  301456 
-Quantile  0.975 306751 
+Quantile  0.75  301459 
+Quantile  0.975 306819 
 Mean            280003 
-Stdev           2866.22 
-Quantile  0.025 273769 
-Quantile  0.25  278616 
+Stdev           2891.25 
+Quantile  0.025 273707 
+Quantile  0.25  278612 
 Quantile  0.5   279985 
-Quantile  0.75  281358 
-Quantile  0.975 286302 
-Mean            349944 
-Stdev           3582.06 
-Quantile  0.025 342059 
-Quantile  0.25  348227 
-Quantile  0.5   349948 
-Quantile  0.75  351656 
-Quantile  0.975 357722 
+Quantile  0.75  281361 
+Quantile  0.975 286365 
+Mean            349943 
+Stdev           3613.31 
+Quantile  0.025 341976 
+Quantile  0.25  348223 
+Quantile  0.5   349947 
+Quantile  0.75  351659 
+Quantile  0.975 357796 
 Mean            299995 
-Stdev           3071 
-Quantile  0.025 293302 
-Quantile  0.25  298511 
-Quantile  0.5   299980 
-Quantile  0.75  301450 
-Quantile  0.975 306731 
+Stdev           3097.81 
+Quantile  0.025 293235 
+Quantile  0.25  298507 
+Quantile  0.5   299979 
+Quantile  0.75  301453 
+Quantile  0.975 306797 
 Mean            288037 
-Stdev           2949.85 
-Quantile  0.025 281676 
-Quantile  0.25  286600 
-Quantile  0.5   288005 
-Quantile  0.75  289422 
-Quantile  0.975 294574 
-Mean            280030 
-Stdev           2869.52 
-Quantile  0.025 273835 
-Quantile  0.25  278635 
+Stdev           2975.65 
+Quantile  0.025 281615 
+Quantile  0.25  286597 
+Quantile  0.5   288004 
+Quantile  0.75  289425 
+Quantile  0.975 294642 
+Mean            280031 
+Stdev           2894.67 
+Quantile  0.025 273775 
+Quantile  0.25  278632 
 Quantile  0.5   280001 
-Quantile  0.75  281378 
-Quantile  0.975 286382 
-Mean            160137 
-Stdev           1649.66 
-Quantile  0.025 156767 
-Quantile  0.25  159303 
+Quantile  0.75  281381 
+Quantile  0.975 286448 
+Mean            160139 
+Stdev           1664.51 
+Quantile  0.025 156741 
+Quantile  0.25  159302 
 Quantile  0.5   160070 
-Quantile  0.75  160876 
-Quantile  0.975 163971 
-Mean            245865 
-Stdev           69924 
-Quantile  0.025 137884 
-Quantile  0.25  196701 
-Quantile  0.5   235730 
-Quantile  0.75  283432 
-Quantile  0.975 412340 
+Quantile  0.75  160878 
+Quantile  0.975 164018 
+Mean            245946 
+Stdev           69998.1 
+Quantile  0.025 137889 
+Quantile  0.25  196739 
+Quantile  0.5   235786 
+Quantile  0.75  283528 
+Quantile  0.975 412641 
 Mean            247988 
-Stdev           2538.73 
-Quantile  0.025 242441 
-Quantile  0.25  246764 
+Stdev           2560.91 
+Quantile  0.025 242386 
+Quantile  0.25  246761 
 Quantile  0.5   247979 
-Quantile  0.75  249193 
-Quantile  0.975 253543 
-Mean            228041 
-Stdev           2335.49 
-Quantile  0.025 223023 
-Quantile  0.25  226901 
+Quantile  0.75  249196 
+Quantile  0.975 253598 
+Mean            228042 
+Stdev           2355.95 
+Quantile  0.025 222976 
+Quantile  0.25  226899 
 Quantile  0.5   228011 
-Quantile  0.75  229135 
-Quantile  0.975 233234 
+Quantile  0.75  229138 
+Quantile  0.975 233289 
 Mean            250006 
-Stdev           2559.45 
-Quantile  0.025 244442 
-Quantile  0.25  248767 
+Stdev           2581.82 
+Quantile  0.025 244387 
+Quantile  0.25  248764 
 Quantile  0.5   249989 
-Quantile  0.75  251216 
-Quantile  0.975 255633 
+Quantile  0.75  251218 
+Quantile  0.975 255690 
 Mean            230049 
-Stdev           2356.58 
-Quantile  0.025 224997 
-Quantile  0.25  228896 
+Stdev           2377.24 
+Quantile  0.025 224949 
+Quantile  0.25  228894 
 Quantile  0.5   230015 
-Quantile  0.75  231149 
-Quantile  0.975 235300 
-Mean            484593 
-Stdev           4974.75 
-Quantile  0.025 473142 
-Quantile  0.25  482300 
-Quantile  0.5   484735 
-Quantile  0.75  487064 
-Quantile  0.975 494873 
-Mean            322542 
-Stdev           98067.7 
-Quantile  0.025 171105 
-Quantile  0.25  253102 
-Quantile  0.5   308486 
-Quantile  0.75  375920 
-Quantile  0.975 555047 
+Quantile  0.75  231152 
+Quantile  0.975 235356 
+Mean            484586 
+Stdev           5018.69 
+Quantile  0.025 473003 
+Quantile  0.25  482291 
+Quantile  0.5   484733 
+Quantile  0.75  487066 
+Quantile  0.975 494952 
+Mean            322519 
+Stdev           98126.4 
+Quantile  0.025 171017 
+Quantile  0.25  253043 
+Quantile  0.5   308447 
+Quantile  0.75  375911 
+Quantile  0.975 555193 
 Mean            315012 
-Stdev           3225.2 
-Quantile  0.025 308009 
-Quantile  0.25  313449 
+Stdev           3253.36 
+Quantile  0.025 307940 
+Quantile  0.25  313446 
 Quantile  0.5   314989 
-Quantile  0.75  316535 
-Quantile  0.975 322112 
+Quantile  0.75  316538 
+Quantile  0.975 322183 
 Mean            285044 
-Stdev           2919.05 
-Quantile  0.025 278759 
-Quantile  0.25  283620 
+Stdev           2944.59 
+Quantile  0.025 278698 
+Quantile  0.25  283617 
 Quantile  0.5   285009 
-Quantile  0.75  286412 
-Quantile  0.975 291522 
-Mean            389842 
-Stdev           3992.61 
-Quantile  0.025 380898 
-Quantile  0.25  387956 
-Quantile  0.5   389887 
-Quantile  0.75  391779 
-Quantile  0.975 398355 </code></pre>
+Quantile  0.75  286416 
+Quantile  0.975 291589 
+Mean            389840 
+Stdev           4027.5 
+Quantile  0.025 380800 
+Quantile  0.25  387950 
+Quantile  0.5   389886 
+Quantile  0.75  391782 
+Quantile  0.975 398430 </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb68"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Posterior mean</span></span>
 <span id="cb68-2"><a href="#cb68-2" aria-hidden="true" tabindex="-1"></a>brn_mkm_sch_sf<span class="sc">$</span>PMoriginal <span class="ot">&lt;-</span> <span class="fu">sapply</span>(marginals_summaries, <span class="st">'[['</span>, <span class="st">"mean"</span>) </span>
 <span id="cb68-3"><a href="#cb68-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Replace missing hp with predicted</span></span>
-<span id="cb68-4"><a href="#cb68-4" aria-hidden="true" tabindex="-1"></a>brn_mkm_sch_sf<span class="sc">$</span>hp[<span class="fu">is.na</span>(brn_mkm_sch_sf<span class="sc">$</span>hp)] <span class="ot">&lt;-</span> brn_mkm_sch_sf<span class="sc">$</span>PMoriginal[<span class="fu">is.na</span>(brn_mkm_sch_sf<span class="sc">$</span>hp)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb68-4"><a href="#cb68-4" aria-hidden="true" tabindex="-1"></a>brn_mkm_sch_sf<span class="sc">$</span>hp[<span class="fu">is.na</span>(brn_mkm_sch_sf<span class="sc">$</span>hp)] <span class="ot">&lt;-</span> brn_mkm_sch_sf<span class="sc">$</span>PMoriginal[<span class="fu">is.na</span>(brn_mkm_sch_sf<span class="sc">$</span>hp)]</span>
+<span id="cb68-5"><a href="#cb68-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb68-6"><a href="#cb68-6" aria-hidden="true" tabindex="-1"></a>brn_mkm_sch_sf<span class="sc">$</span>area <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="fu">st_area</span>(brn_mkm_sch_sf))</span>
+<span id="cb68-7"><a href="#cb68-7" aria-hidden="true" tabindex="-1"></a>brn_mkm_sch_sf<span class="sc">$</span>Y <span class="ot">&lt;-</span> brn_mkm_sch_sf<span class="sc">$</span>schools</span>
+<span id="cb68-8"><a href="#cb68-8" aria-hidden="true" tabindex="-1"></a>brn_mkm_sch_sf<span class="sc">$</span>E <span class="ot">&lt;-</span> <span class="fu">sum</span>(brn_mkm_sch_sf<span class="sc">$</span>schools)<span class="sc">/</span><span class="fu">sum</span>(brn_mkm_sch_sf<span class="sc">$</span>population) <span class="sc">*</span> brn_mkm_sch_sf<span class="sc">$</span>population</span>
+<span id="cb68-9"><a href="#cb68-9" aria-hidden="true" tabindex="-1"></a>brn_mkm_sch_sf<span class="sc">$</span>SIR <span class="ot">&lt;-</span> brn_mkm_sch_sf<span class="sc">$</span>Y<span class="sc">/</span>brn_mkm_sch_sf<span class="sc">$</span>E</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div></div>
 <div class="cell-container"><div class="cell-decorator"><pre>In [5]:</pre></div><div class="cell">
-<div class="sourceCode cell-code" id="cb69"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a>brn_mkm_sch_sf<span class="sc">$</span>area <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="fu">st_area</span>(brn_mkm_sch_sf))</span>
-<span id="cb69-2"><a href="#cb69-2" aria-hidden="true" tabindex="-1"></a>brn_mkm_sch_sf<span class="sc">$</span>Y <span class="ot">&lt;-</span> brn_mkm_sch_sf<span class="sc">$</span>schools</span>
-<span id="cb69-3"><a href="#cb69-3" aria-hidden="true" tabindex="-1"></a>brn_mkm_sch_sf<span class="sc">$</span>E <span class="ot">&lt;-</span> <span class="fu">sum</span>(brn_mkm_sch_sf<span class="sc">$</span>schools)<span class="sc">/</span><span class="fu">sum</span>(brn_mkm_sch_sf<span class="sc">$</span>population) <span class="sc">*</span> brn_mkm_sch_sf<span class="sc">$</span>population</span>
-<span id="cb69-4"><a href="#cb69-4" aria-hidden="true" tabindex="-1"></a>brn_mkm_sch_sf<span class="sc">$</span>SIR <span class="ot">&lt;-</span> brn_mkm_sch_sf<span class="sc">$</span>Y<span class="sc">/</span>brn_mkm_sch_sf<span class="sc">$</span>E</span>
-<span id="cb69-5"><a href="#cb69-5" aria-hidden="true" tabindex="-1"></a>label_sf <span class="ot">&lt;-</span> brn_mkm_sch_sf <span class="sc">|&gt;</span> </span>
-<span id="cb69-6"><a href="#cb69-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(SIR<span class="sc">!=</span><span class="dv">0</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb69-7"><a href="#cb69-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(SIR) <span class="sc">|&gt;</span> </span>
-<span id="cb69-8"><a href="#cb69-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">5</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb69-9"><a href="#cb69-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">label =</span> <span class="fu">paste0</span>(mukim, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>, <span class="fu">round</span>(SIR,<span class="dv">2</span>)))</span>
-<span id="cb69-10"><a href="#cb69-10" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span></span>
-<span id="cb69-11"><a href="#cb69-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(<span class="at">data =</span> brn_mkm_sch_sf, <span class="fu">aes</span>(<span class="at">fill =</span> SIR)) <span class="sc">+</span></span>
-<span id="cb69-12"><a href="#cb69-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(<span class="at">data =</span> <span class="fu">filter</span>(mkm_sf), <span class="at">color=</span><span class="st">"grey"</span>, <span class="at">alpha=</span><span class="dv">0</span>, <span class="at">linewidth=</span><span class="fl">0.7</span>) <span class="sc">+</span></span>
-<span id="cb69-13"><a href="#cb69-13" aria-hidden="true" tabindex="-1"></a>  ggrepel<span class="sc">::</span><span class="fu">geom_label_repel</span>(</span>
-<span id="cb69-14"><a href="#cb69-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> label_sf,</span>
-<span id="cb69-15"><a href="#cb69-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(<span class="at">label =</span> label, <span class="at">geometry =</span> geometry),</span>
-<span id="cb69-16"><a href="#cb69-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">stat =</span> <span class="st">"sf_coordinates"</span>,</span>
-<span id="cb69-17"><a href="#cb69-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">inherit.aes =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb69-18"><a href="#cb69-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">box.padding =</span> <span class="dv">1</span>,</span>
-<span id="cb69-19"><a href="#cb69-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">size =</span> <span class="dv">3</span>,</span>
-<span id="cb69-20"><a href="#cb69-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">alpha =</span> <span class="fl">0.7</span>,</span>
-<span id="cb69-21"><a href="#cb69-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">force=</span><span class="dv">5</span>,</span>
-<span id="cb69-22"><a href="#cb69-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">max.overlaps =</span> <span class="cn">Inf</span></span>
-<span id="cb69-23"><a href="#cb69-23" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb69-24"><a href="#cb69-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_viridis_b</span>(</span>
-<span id="cb69-25"><a href="#cb69-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">option =</span> <span class="st">"E"</span>,</span>
-<span id="cb69-26"><a href="#cb69-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">direction =</span> <span class="sc">-</span><span class="dv">1</span>,</span>
-<span id="cb69-27"><a href="#cb69-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="st">"SIR"</span>,</span>
-<span id="cb69-28"><a href="#cb69-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">na.value =</span> <span class="cn">NA</span>,</span>
-<span id="cb69-29"><a href="#cb69-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">breaks =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>)    <span class="co"># Number of bins</span></span>
-<span id="cb69-30"><a href="#cb69-30" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb69-31"><a href="#cb69-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="cn">NULL</span>, <span class="at">y =</span> <span class="cn">NULL</span>) <span class="sc">+</span></span>
-<span id="cb69-32"><a href="#cb69-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb69"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a><span class="co"># SIR</span></span>
+<span id="cb69-2"><a href="#cb69-2" aria-hidden="true" tabindex="-1"></a>label_sf <span class="ot">&lt;-</span> brn_mkm_sch_sf <span class="sc">|&gt;</span> </span>
+<span id="cb69-3"><a href="#cb69-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(SIR<span class="sc">!=</span><span class="dv">0</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb69-4"><a href="#cb69-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(SIR) <span class="sc">|&gt;</span> </span>
+<span id="cb69-5"><a href="#cb69-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">5</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb69-6"><a href="#cb69-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">label =</span> <span class="fu">paste0</span>(mukim, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>, <span class="fu">round</span>(SIR,<span class="dv">2</span>)))</span>
+<span id="cb69-7"><a href="#cb69-7" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb69-8"><a href="#cb69-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(<span class="at">data =</span> brn_mkm_sch_sf, <span class="fu">aes</span>(<span class="at">fill =</span> SIR)) <span class="sc">+</span></span>
+<span id="cb69-9"><a href="#cb69-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(<span class="at">data =</span> <span class="fu">filter</span>(mkm_sf), <span class="at">color=</span><span class="st">"grey"</span>, <span class="at">alpha=</span><span class="dv">0</span>, <span class="at">linewidth=</span><span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb69-10"><a href="#cb69-10" aria-hidden="true" tabindex="-1"></a>  ggrepel<span class="sc">::</span><span class="fu">geom_label_repel</span>(</span>
+<span id="cb69-11"><a href="#cb69-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> label_sf,</span>
+<span id="cb69-12"><a href="#cb69-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(<span class="at">label =</span> label, <span class="at">geometry =</span> geometry),</span>
+<span id="cb69-13"><a href="#cb69-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">stat =</span> <span class="st">"sf_coordinates"</span>,</span>
+<span id="cb69-14"><a href="#cb69-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">inherit.aes =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb69-15"><a href="#cb69-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">box.padding =</span> <span class="dv">1</span>,</span>
+<span id="cb69-16"><a href="#cb69-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">size =</span> <span class="dv">3</span>,</span>
+<span id="cb69-17"><a href="#cb69-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">alpha =</span> <span class="fl">0.7</span>,</span>
+<span id="cb69-18"><a href="#cb69-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">force=</span><span class="dv">5</span>,</span>
+<span id="cb69-19"><a href="#cb69-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">max.overlaps =</span> <span class="cn">Inf</span></span>
+<span id="cb69-20"><a href="#cb69-20" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb69-21"><a href="#cb69-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_viridis_b</span>(</span>
+<span id="cb69-22"><a href="#cb69-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">option =</span> <span class="st">"E"</span>,</span>
+<span id="cb69-23"><a href="#cb69-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">direction =</span> <span class="sc">-</span><span class="dv">1</span>,</span>
+<span id="cb69-24"><a href="#cb69-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="st">"SIR"</span>,</span>
+<span id="cb69-25"><a href="#cb69-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">na.value =</span> <span class="cn">NA</span>,</span>
+<span id="cb69-26"><a href="#cb69-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">breaks =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>)    <span class="co"># Number of bins</span></span>
+<span id="cb69-27"><a href="#cb69-27" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb69-28"><a href="#cb69-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="cn">NULL</span>, <span class="at">y =</span> <span class="cn">NULL</span>) <span class="sc">+</span></span>
+<span id="cb69-29"><a href="#cb69-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning in st_point_on_surface.sfc(sf::st_zm(x)): st_point_on_surface may not
 give correct results for longitude/latitude data</code></pre>
@@ -1401,9 +1425,6 @@ give correct results for longitude/latitude data</code></pre>
 </div>
 </div>
 </div></div>
-<ul>
-<li>There are significantly fewer schools in Mukim xxx</li>
-</ul>
 <div class="cell-container"><div class="cell-decorator"><pre>In [6]:</pre></div><div class="cell">
 <div class="sourceCode cell-code" id="cb71"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb71-1"><a href="#cb71-1" aria-hidden="true" tabindex="-1"></a>nb <span class="ot">&lt;-</span> <span class="fu">poly2nb</span>(brn_mkm_sch_sf)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
@@ -1415,60 +1436,60 @@ if this sub-graph count seems unexpected, try increasing the snap argument.</cod
 <span id="cb73-3"><a href="#cb73-3" aria-hidden="true" tabindex="-1"></a>brn_mkm_sch_sf<span class="sc">$</span>re_u <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(brn_mkm_sch_sf)</span>
 <span id="cb73-4"><a href="#cb73-4" aria-hidden="true" tabindex="-1"></a>brn_mkm_sch_sf <span class="ot">&lt;-</span> brn_mkm_sch_sf <span class="sc">%&gt;%</span></span>
 <span id="cb73-5"><a href="#cb73-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb73-6"><a href="#cb73-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">pop_s =</span> population <span class="sc">/</span> <span class="dv">1000</span>,   <span class="co"># per 1000 people</span></span>
-<span id="cb73-7"><a href="#cb73-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">area_s =</span> <span class="fu">as.numeric</span>(area) <span class="sc">/</span> <span class="dv">1000000</span>,  <span class="co"># e.g., km^2 instead of m^2</span></span>
-<span id="cb73-8"><a href="#cb73-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">hp_s =</span> hp <span class="sc">/</span> <span class="dv">1000</span>              <span class="co"># per 1000 currency units</span></span>
+<span id="cb73-6"><a href="#cb73-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">pop_s =</span> population <span class="sc">/</span> <span class="dv">10000</span>,   <span class="co"># per 10000 people</span></span>
+<span id="cb73-7"><a href="#cb73-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">area_s =</span> <span class="fu">as.numeric</span>(area) <span class="sc">/</span> <span class="dv">10000000</span>,  <span class="co"># e.g., 10 km^2 instead of m^2</span></span>
+<span id="cb73-8"><a href="#cb73-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">hp_s =</span> hp <span class="sc">/</span> <span class="dv">10000000</span>              <span class="co"># per million $</span></span>
 <span id="cb73-9"><a href="#cb73-9" aria-hidden="true" tabindex="-1"></a>  )</span>
 <span id="cb73-10"><a href="#cb73-10" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb73-11"><a href="#cb73-11" aria-hidden="true" tabindex="-1"></a>formula <span class="ot">&lt;-</span> Y <span class="sc">~</span> pop_s <span class="sc">+</span> area_s <span class="sc">+</span> hp_s <span class="sc">+</span> <span class="fu">f</span>(re_u, <span class="at">model =</span> <span class="st">"bym2"</span>, <span class="at">graph =</span> g)</span>
-<span id="cb73-12"><a href="#cb73-12" aria-hidden="true" tabindex="-1"></a><span class="co"># formula &lt;- Y ~ pop_s + hp_s + f(re_u, model = "bym2", graph = g)</span></span>
-<span id="cb73-13"><a href="#cb73-13" aria-hidden="true" tabindex="-1"></a><span class="co"># formula &lt;- Y ~ pop_s + f(re_u, model = "bym2", graph = g)</span></span>
-<span id="cb73-14"><a href="#cb73-14" aria-hidden="true" tabindex="-1"></a><span class="co"># formula &lt;- Y ~ hp_s + f(re_u, model = "bym2", graph = g)</span></span>
-<span id="cb73-15"><a href="#cb73-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb73-16"><a href="#cb73-16" aria-hidden="true" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">inla</span>(formula, <span class="at">family =</span> <span class="st">"poisson"</span>, <span class="at">data =</span> brn_mkm_sch_sf, <span class="at">E=</span>E,</span>
-<span id="cb73-17"><a href="#cb73-17" aria-hidden="true" tabindex="-1"></a>            <span class="at">control.predictor =</span> <span class="fu">list</span>(<span class="at">compute =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb73-18"><a href="#cb73-18" aria-hidden="true" tabindex="-1"></a>            <span class="at">control.compute =</span> <span class="fu">list</span>(<span class="at">return.marginals.predictor =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb73-19"><a href="#cb73-19" aria-hidden="true" tabindex="-1"></a>            <span class="at">verbose =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb73-20"><a href="#cb73-20" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(res)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb73-12"><a href="#cb73-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb73-13"><a href="#cb73-13" aria-hidden="true" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">inla</span>(formula, <span class="at">family =</span> <span class="st">"poisson"</span>, <span class="at">data =</span> brn_mkm_sch_sf, <span class="at">E=</span>E,</span>
+<span id="cb73-14"><a href="#cb73-14" aria-hidden="true" tabindex="-1"></a>            <span class="at">control.predictor =</span> <span class="fu">list</span>(<span class="at">compute =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb73-15"><a href="#cb73-15" aria-hidden="true" tabindex="-1"></a>            <span class="at">control.compute =</span> <span class="fu">list</span>(<span class="at">return.marginals.predictor =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb73-16"><a href="#cb73-16" aria-hidden="true" tabindex="-1"></a>            <span class="at">verbose =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb73-17"><a href="#cb73-17" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(res)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Time used:
-    Pre = 2.94, Running = 0.858, Post = 0.039, Total = 3.84 
+    Pre = 2.83, Running = 0.882, Post = 0.0423, Total = 3.76 
 Fixed effects:
-              mean    sd 0.025quant 0.5quant 0.975quant   mode kld
-(Intercept)  1.077 0.421      0.240    1.080      1.894  1.080   0
-pop_s       -0.044 0.007     -0.058   -0.044     -0.029 -0.044   0
-area_s       0.002 0.001      0.000    0.002      0.003  0.002   0
-hp_s        -0.001 0.001     -0.003   -0.001      0.002 -0.001   0
+              mean     sd 0.025quant 0.5quant 0.975quant   mode kld
+(Intercept)  1.046  0.397      0.257    1.049      1.818  1.049   0
+pop_s       -0.437  0.072     -0.579   -0.437     -0.296 -0.437   0
+area_s       0.016  0.009     -0.001    0.016      0.034  0.016   0
+hp_s        -6.529 11.516    -28.945   -6.594     16.280 -6.589   0
 
 Random effects:
   Name    Model
     re_u BYM2 model
 
 Model hyperparameters:
-                       mean       sd 0.025quant 0.5quant 0.975quant   mode
-Precision for re_u 1153.580 8106.813      9.355  150.008   7797.751 19.643
-Phi for re_u          0.359    0.279      0.013    0.292      0.929  0.021
+                      mean       sd 0.025quant 0.5quant 0.975quant   mode
+Precision for re_u 1153.79 8110.609      9.353  149.978    7799.15 19.639
+Phi for re_u          0.36    0.279      0.013    0.293       0.93  0.021
 
-Marginal log-Likelihood:  -79.58 
+Marginal log-Likelihood:  -65.86 
  is computed 
 Posterior summaries for the linear predictor and the fitted values are computed
 (Posterior marginals needs also 'control.compute=list(return.marginals.predictor=TRUE)')</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb75"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a>res<span class="sc">$</span>summary.fixed</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>                     mean           sd    0.025quant      0.5quant   0.975quant
-(Intercept)  1.0771263538 0.4210748878  0.2396300253  1.0804845526  1.894407505
-pop_s       -0.0436376970 0.0072401090 -0.0578994567 -0.0436207230 -0.029476686
-area_s       0.0015500338 0.0008828963 -0.0001639264  0.0015434960  0.003302810
-hp_s        -0.0007231179 0.0012448593 -0.0031404031 -0.0007325078  0.001750529
-                     mode          kld
-(Intercept)  1.0800861168 1.976516e-08
-pop_s       -0.0436221941 5.069735e-09
-area_s       0.0015440080 1.771365e-08
-hp_s        -0.0007314832 1.956673e-08</code></pre>
+<pre><code>                   mean          sd    0.025quant    0.5quant  0.975quant
+(Intercept)  1.04603337  0.39749404  2.566932e-01  1.04889259  1.81827764
+pop_s       -0.43707901  0.07230356 -5.794824e-01 -0.43691599 -0.29564204
+area_s       0.01610511  0.00881201 -9.805843e-04  0.01603241  0.03362203
+hp_s        -6.52857648 11.51586101 -2.894546e+01 -6.59445446 16.28041703
+                   mode          kld
+(Intercept)  1.04860207 1.810660e-08
+pop_s       -0.43692990 4.870508e-09
+area_s       0.01603785 2.111473e-08
+hp_s        -6.58855518 1.325584e-08</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb77"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb77-1"><a href="#cb77-1" aria-hidden="true" tabindex="-1"></a>brn_mkm_sch_sf<span class="sc">$</span>RA <span class="ot">&lt;-</span> res<span class="sc">$</span>summary.fitted.values[, <span class="st">"mean"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div></div>
+<p>The model results show that the intercept is estimated at <span class="math inline">\(\hat{\beta}_0 = 1.077\)</span>, with a 95% credible interval of <span class="math inline">\((0.239, 1.894)\)</span>. The coefficient for population, <span class="math inline">\(\beta_1 = -0.436\)</span>, with a 95% credible interval of <span class="math inline">\((-0.579, -0.295)\)</span>, indicates a statistically significant negative relationship between population size and relative school abundance. Specifically, for every 10,000 increase in population, the relative abundance of schools decreases by approximately 35%, since <span class="math inline">\(\exp(-0.436) \approx 0.647\)</span>. In contrast, the covariates: mukim size and house price are not statistically significant. The coefficient for mukim size is <span class="math inline">\(\hat{\beta_2}=0.015\)</span> (95% CI: -0.002, 0.032), and for house price is <span class="math inline">\(\hat{\beta_3}=-0.759\)</span> (95% CI: -3.174, 1.704).</p>
+<p>The estimated relative abundance (RA) of schools across mukims indicates lower values in the northern coastal mukims, particularly in northern Brunei-Muara District, along the South China Sea. Conversely, higher RA values appear inland, especially in less densely populated regions.</p>
+<p>To identify mukims with potentially inadequate school provision, non-exceedence probabilities were computed for a threshold of <span class="math inline">\(RA &lt;0.7\)</span>. The analysis indicates that it is highly likely that several mukims fall below this threshold, including Mukim Sengkurong, Mukim Gadong A, Mukim Gadong B, Mukim Berakas B, and Mukim Mentiri.</p>
 <div class="cell-container"><div class="cell-decorator"><pre>In [7]:</pre></div><div class="cell">
 <div class="sourceCode cell-code" id="cb78"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb78-1"><a href="#cb78-1" aria-hidden="true" tabindex="-1"></a>label_sf <span class="ot">&lt;-</span> brn_mkm_sch_sf <span class="sc">|&gt;</span> </span>
 <span id="cb78-2"><a href="#cb78-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(RA<span class="sc">!=</span><span class="dv">0</span>) <span class="sc">|&gt;</span> </span>
@@ -1512,7 +1533,7 @@ give correct results for longitude/latitude data</code></pre>
 </div></div>
 <div class="cell-container"><div class="cell-decorator"><pre>In [8]:</pre></div><div class="cell">
 <div class="sourceCode cell-code" id="cb80"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb80-1"><a href="#cb80-1" aria-hidden="true" tabindex="-1"></a>brn_mkm_sch_sf<span class="sc">$</span>exc <span class="ot">&lt;-</span> <span class="fu">sapply</span>(res<span class="sc">$</span>marginals.fitted.values,</span>
-<span id="cb80-2"><a href="#cb80-2" aria-hidden="true" tabindex="-1"></a>                    <span class="at">FUN =</span> <span class="cf">function</span>(marg){<span class="fu">inla.pmarginal</span>(<span class="at">q =</span> <span class="fl">0.75</span>, <span class="at">marginal =</span> marg)})</span>
+<span id="cb80-2"><a href="#cb80-2" aria-hidden="true" tabindex="-1"></a>                    <span class="at">FUN =</span> <span class="cf">function</span>(marg){<span class="fu">inla.pmarginal</span>(<span class="at">q =</span> <span class="fl">0.7</span>, <span class="at">marginal =</span> marg)})</span>
 <span id="cb80-3"><a href="#cb80-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb80-4"><a href="#cb80-4" aria-hidden="true" tabindex="-1"></a>label_sf <span class="ot">&lt;-</span> brn_mkm_sch_sf <span class="sc">|&gt;</span> </span>
 <span id="cb80-5"><a href="#cb80-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(exc)) <span class="sc">|&gt;</span> </span>
@@ -1535,12 +1556,13 @@ give correct results for longitude/latitude data</code></pre>
 <span id="cb80-22"><a href="#cb80-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_viridis_b</span>(</span>
 <span id="cb80-23"><a href="#cb80-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">option =</span> <span class="st">"E"</span>,</span>
 <span id="cb80-24"><a href="#cb80-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">direction =</span> <span class="dv">1</span>,</span>
-<span id="cb80-25"><a href="#cb80-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="st">"Exceedance Probability RA &lt; 0.8"</span>,</span>
+<span id="cb80-25"><a href="#cb80-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="st">"Non-exceedance Probability RA &lt; 0.7"</span>,</span>
 <span id="cb80-26"><a href="#cb80-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">na.value =</span> <span class="cn">NA</span>,</span>
 <span id="cb80-27"><a href="#cb80-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">breaks =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="fl">0.25</span>,<span class="fl">0.5</span>,<span class="fl">0.75</span>)    <span class="co"># Number of bins</span></span>
 <span id="cb80-28"><a href="#cb80-28" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
 <span id="cb80-29"><a href="#cb80-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="cn">NULL</span>, <span class="at">y =</span> <span class="cn">NULL</span>) <span class="sc">+</span></span>
-<span id="cb80-30"><a href="#cb80-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb80-30"><a href="#cb80-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb80-31"><a href="#cb80-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"top"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning in st_point_on_surface.sfc(sf::st_zm(x)): st_point_on_surface may not
 give correct results for longitude/latitude data</code></pre>
@@ -1553,21 +1575,24 @@ give correct results for longitude/latitude data</code></pre>
 </div>
 </div>
 </div></div>
-<ul>
-<li>Coefficient , sginificance</li>
-</ul>
 </section>
 </section>
 <section id="discussion-limitation" class="level2" data-number="5">
 <h2 data-number="5" class="anchored" data-anchor-id="discussion-limitation"><span class="header-section-number">5</span> Discussion &amp; Limitation</h2>
-<p>There are significantly fewer schools in Mukim xxx, when explored, its not forested area. Housing region, some may be newer nieghbourhood so.. good idea for mroe schools there, nearer from home, less transportation cost, environmental, time.</p>
-<p>Given that Brunei has higher PISA scores than Malaysia, it would be interesting to explore whether accessibility may be a potential factor. / Malaysia has more population than Brunei, how does the school compare</p>
-<p>Limitation: only public schools, to consider private schools age groups, 2018 data, school types, some simulation in housing price, house price is listing price (only a proxy for market values), may deviate from actual sales price due to negotian dynamics and other factors ## Conclusions {#sec-conc}</p>
-<ul>
-<li>School count quite similar, more in main city</li>
-<li>studnet teacher ratio, primary simiilar other than dense city (miri, kuching, kota kinabalu), but brunei has lesser secondary std-tcr</li>
-<li>There are significantly fewer schools in Mukim xxx</li>
-</ul>
+<p>The negative relationship between population and school counts, as well as higher RA values in inland (rural) mukims than coastal ares with larger population suggests that school availability in rural mukims seem to be adequate, potentially due to legacy planning policies or intentional efforts to ensure equitable access in remote areas.</p>
+<p>In contrast, urban and peri-urban mukims in the Brunei-Muara District, the country’s most densely populated and economically active region, show signs of disparities in school access. Notably, the high non-exceedance probability of <span class="math inline">\(RA &lt; 0.7\)</span> in <strong>Mukim Sengkurong, Gadong A &amp; B, Berakas B, and Mentiri</strong> indicates that they have fewer schools than expected relative to their population sizes. These disparities highlight areas that may be underinvested in educational infrastructure, warranting closer policy attention.</p>
+<p>Importantly, these mukims are also encompass several new government housing developments, such as Perpindahan Lugu and Perpindahan Tanah Jambu. This suggests a potential planning gap, where population is increasing due to housing developments, but educational infrastructure has not yet caught up.</p>
+<p>However, inspection of the Choropleth map of school counts per mukim reveals that these areas have a similar number of schools compared to their neighboring mukims. This suggests that while the absolute number of schools may not be unusually low, the rapid increase in population within these new housing areas may have outpaced school capacity, leading to a situation where demand exceeds supply within these specific zones.</p>
+<p>Nevertheless, this situation represents a strategic opportunity. Prioritizing school construction in these fast-growing neighborhoods could significantly improve access to education, reduce commute times, lower transportation costs, and enhance the overall quality of life for residents. Locating schools closer to homes supports national goals related to sustainable urban development, walkability, and equity in public services.</p>
+<!-- Given that Brunei has higher PISA scores than Malaysia, it would be interesting to explore whether accessibility may be a potential factor. / Malaysia has more population than Brunei, how does the school compare -->
+<section id="limitations" class="level3" data-number="5.1">
+<h3 data-number="5.1" class="anchored" data-anchor-id="limitations"><span class="header-section-number">5.1</span> Limitations</h3>
+<p>This study is limited to public schools, excluding private and international institutions that may affect school availability in some areas. The data is from 2018, potentially missing recent changes, especially in fast-growing neighborhoods. It also does not account for school types (e.g., primary vs.&nbsp;secondary) or age-specific population data, which are important for demand estimation. Housing price was used as a proxy for socioeconomic status, but data relies on listing prices, which may not reflect actual market values due to negotiation factors. In some areas, price data was also simulated, introducing further uncertainty.</p>
+</section>
+</section>
+<section id="sec-conc" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="sec-conc"><span class="header-section-number">6</span> Conclusions</h2>
+<p>In summary, the analysis reveals a negative relationship between population size and relative school abundance, suggesting urban areas have fewer schools per capita than rural ones. Several mukims in the Brunei-Muara District, including Sengkurong, Gadong A &amp; B, Berakas B, and Mentiri, appear to have fewer schools than expected, despite ongoing population growth driven by new housing developments. While total school counts may seem adequate, local demand in these areas may exceed capacity. Addressing this gap offers a strategic opportunity to improve access, reduce travel time, and support equitable urban planning.</p>
 </section>
 <section id="references" class="level2 unnumbered">
 <h2 class="unnumbered anchored" data-anchor-id="references">References</h2>
