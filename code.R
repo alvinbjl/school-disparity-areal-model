@@ -205,6 +205,39 @@ brn_dis_sch_sf <- left_join(brn_dis_sch_sf, dis_pop, by="district")
 # C. North Borneo
 nborneo_sch_sf <- rbind(east_mys_sch_sf, brn_dis_sch_sf)
 
+
+# EDA 0: spatial count ----------------------------------------------------
+mapview(mkm_sf, layer.name = "MKMs", alpha.regions = 0, color = "black") +
+  mapview(brn_mkm_sch_sf , zcol = "schools", col.region=pal)
+label_sf <- brn_mkm_sch_sf |> 
+  arrange(desc(schools)) |> 
+  slice_head(n = 5) |> 
+  mutate(label = paste0(mukim, "\n", schools))
+ggplot() +
+  geom_sf(data = brn_mkm_sch_sf, aes(fill = schools)) +
+  geom_sf(data = mkm_sf, color="grey", alpha=0, linewidth=0.7) +
+  ggrepel::geom_label_repel(
+    data = label_sf,
+    aes(label = label, geometry = geometry),
+    stat = "sf_coordinates",
+    inherit.aes = FALSE,
+    box.padding = 1,
+    size = 3,
+    alpha = 0.7,
+    force=5,
+    max.overlaps = Inf
+  ) +
+  scale_fill_viridis_b(
+    option = "E",
+    direction = 1,
+    name = "Schools Count",
+    na.value = NA,
+    breaks = c(0,2,4,6,8)    # Number of bins
+  ) +
+  labs(x = NULL, y = NULL) +
+  theme_minimal() +
+  theme(legend.position = "top")
+
 # EDA1: school count ------------------------------------------------------------------
 nborneo_sch_sf <- nborneo_sch_sf %>% mutate(area = as.numeric(st_area(geometry)))
 nborneo_sch_sf <- nborneo_sch_sf %>% mutate(sch_pop = schools/population*100000, # per 10000 people
@@ -281,7 +314,7 @@ m2 <- ggplot(nborneo_sch_sf) +
     breaks = c(0,30000,70000,100000, 200000,400000)        # Number of bins
   ) +
   labs(x = NULL, y = NULL) +
-  theme_minimal()
+  theme_minimal() 
 
 #m3: sch_area
 label_sf <- nborneo_sch_sf |> 
@@ -313,7 +346,7 @@ m3 <- ggplot() +
     breaks = c(0,0.1,0.2,0.3,0.5,1)        # Number of bins
   ) +
   labs(x = NULL, y = NULL) +
-  theme_minimal()
+  theme_minimal() 
 
 # m4: sch_pop
 label_sf <- nborneo_sch_sf |> 
@@ -678,6 +711,10 @@ res <- inla(formula, family = "poisson", data = brn_mkm_sch_sf, E=E,
             verbose = TRUE)
 summary(res)
 res$summary.fixed
+res$summary.fitted.values$mean
+res$summary.linear.predictor$mean
+all.equal(exp(res$summary.linear.predictor$mean),
+          res$summary.fitted.values$mean)
 
 brn_mkm_sch_sf$RA <- res$summary.fitted.values[, "mean"]
 
@@ -723,8 +760,15 @@ brn_mkm_sch_sf$exc <- sapply(res$marginals.fitted.values,
                     FUN = function(marg){inla.pmarginal(q = 0.7, marginal = marg)})
 
 at <- c(0,0.25,0.5,0.75,1)
+sch_sf <- sch_sf |> filter(Sector == "MOE",
+                           !Education.Level %in% c("Vocational / Technical Education", 
+                                         "Higher Education",
+                                         "Pre-primary",
+                                         "Technical / Vocational Institution",
+                                         "Vocational / Technical  Education")) 
 mapview(brn_mkm_sch_sf, zcol = "exc", col.region=pal, at=at, 
-        layer.name="Exceedance Probability RA < 0.8")
+        layer.name="Exceedance Probability RA < 0.7") + 
+  mapview(sch_sf, cex=4)
 
 label_sf <- brn_mkm_sch_sf |> 
   arrange(desc(exc)) |> 
@@ -762,12 +806,93 @@ at <- c(0,0.25,0.5,0.75,1)
 mapview(brn_mkm_sch_sf, zcol = "exc2", col.region=pal, at=at, 
         layer.name="Exceedance Probability RA > 1.2")
 
+fitted_counts <- brn_mkm_sch_sf$E * brn_mkm_sch_sf$RA
+brn_mkm_sch_sf$residuals_pearson <- (brn_mkm_sch_sf$Y - fitted_counts) / sqrt(fitted_counts)
+# 3.2 Convert to spatial weights list
+lw <- nb2listw(nb, style = "W")
+# 3.3 Run Moran’s I test on residuals
+moran.test(residuals_pearson, lw)
 
-# Visualize both layers together
-mapview(mkm_sf, layer.name = "MKMs", alpha.regions = 0, color = "black") +
-  mapview(brn_mkm_sch_sf , zcol = "schools")
+my_palette <- colorRampPalette(brewer.pal(11, "RdBu"))(100)
+mapview(brn_mkm_sch_sf, zcol="residuals_pearson", col.regions = my_palette, at = seq(-1, 3, length.out = 101))
 
-
-
-
-
+# EXTRA:
+# Sarawak
+# view(swk_sch_sf)
+# swk_sch_sf_clean <- swk_sch_sf[complete.cases(st_drop_geometry(swk_sch_sf)), ]
+# 
+# swk_sch_sf_clean$area <- as.numeric(st_area(swk_sch_sf_clean))
+# swk_sch_sf_clean$Y <- swk_sch_sf_clean$schools
+# swk_sch_sf_clean$E <- sum(swk_sch_sf_clean$schools)/sum(swk_sch_sf_clean$population) * swk_sch_sf_clean$population
+# nb <- poly2nb(swk_sch_sf_clean)
+# nb2INLA("map.adj", nb)
+# g <- inla.read.graph(filename = "map.adj")
+# swk_sch_sf_clean$re_u <- 1:nrow(swk_sch_sf_clean)
+# swk_sch_sf_clean <- swk_sch_sf_clean %>%
+#   mutate(
+#     pop_s = population / 10000,   # per 10000 people
+#     area_s = as.numeric(area) / 10000000  # e.g., 10 km^2 instead of m^2
+#   )
+# 
+# formula <- Y ~ pop_s + area_s  + f(re_u, model = "bym2", graph = g)
+# # formula <- Y ~ pop_s + hp_s + f(re_u, model = "bym2", graph = g)
+# # formula <- Y ~ pop_s + f(re_u, model = "bym2", graph = g)
+# # formula <- Y ~ hp_s + f(re_u, model = "bym2", graph = g)
+# 
+# res <- inla(formula, family = "poisson", data = swk_sch_sf_clean, E=E,
+#             control.predictor = list(compute = TRUE),
+#             control.compute = list(return.marginals.predictor = TRUE),
+#             verbose = TRUE)
+# summary(res)
+# res$summary.fixed
+# 
+# swk_sch_sf_clean$RA <- res$summary.fitted.values[, "mean"]
+# 
+# m1 <- mapview(swk_sch_sf_clean, zcol = "RA", col.region=pal, at=at)
+# m1
+# swk_sch_sf_clean$exc <- sapply(res$marginals.fitted.values,
+#                              FUN = function(marg){inla.pmarginal(q = 0.7, marginal = marg)})
+# 
+# at <- c(0,0.25,0.5,0.75,1)
+# mapview(swk_sch_sf_clean, zcol = "exc", col.region=pal, at=at, 
+#         layer.name="Exceedance Probability RA < 0.8")
+# 
+# # Sabah
+# # view(swk_sch_sf)
+# sbh_sch_sf_clean <- sbh_sch_sf[complete.cases(st_drop_geometry(sbh_sch_sf)), ]
+# 
+# sbh_sch_sf_clean$area <- as.numeric(st_area(sbh_sch_sf_clean))
+# sbh_sch_sf_clean$Y <- sbh_sch_sf_clean$schools
+# sbh_sch_sf_clean$E <- sum(sbh_sch_sf_clean$schools)/sum(sbh_sch_sf_clean$population) * sbh_sch_sf_clean$population
+# nb <- poly2nb(sbh_sch_sf_clean)
+# nb2INLA("map.adj", nb)
+# g <- inla.read.graph(filename = "map.adj")
+# sbh_sch_sf_clean$re_u <- 1:nrow(sbh_sch_sf_clean)
+# sbh_sch_sf_clean <- sbh_sch_sf_clean %>%
+#   mutate(
+#     pop_s = population / 10000,   # per 10000 people
+#     area_s = as.numeric(area) / 10000000  # e.g., 10 km^2 instead of m^2
+#   )
+# 
+# formula <- Y ~ pop_s + area_s  + f(re_u, model = "bym2", graph = g)
+# # formula <- Y ~ pop_s + hp_s + f(re_u, model = "bym2", graph = g)
+# # formula <- Y ~ pop_s + f(re_u, model = "bym2", graph = g)
+# # formula <- Y ~ hp_s + f(re_u, model = "bym2", graph = g)
+# 
+# res <- inla(formula, family = "poisson", data = sbh_sch_sf_clean, E=E,
+#             control.predictor = list(compute = TRUE),
+#             control.compute = list(return.marginals.predictor = TRUE),
+#             verbose = TRUE)
+# summary(res)
+# res$summary.fixed
+# 
+# sbh_sch_sf_clean$RA <- res$summary.fitted.values[, "mean"]
+# 
+# m1 <- mapview(sbh_sch_sf_clean, zcol = "RA", col.region=pal, at=at)
+# m1
+# sbh_sch_sf_clean$exc <- sapply(res$marginals.fitted.values,
+#                                FUN = function(marg){inla.pmarginal(q = 0.7, marginal = marg)})
+# 
+# at <- c(0,0.25,0.5,0.75,1)
+# mapview(sbh_sch_sf_clean, zcol = "exc", col.region=pal, at=at, 
+#         layer.name="Exceedance Probability RA < 0.8")
