@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Alvin Bong">
+
+<title>Spatial Analysis on School Inequalities in Brunei Darussalam Using Bayesian Hierarchical Modelling</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-813c323200a87c37e262811031999de4.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
+<script async="" src="https://hypothes.is/embed.js"></script>
+<script>
+  window.document.addEventListener("DOMContentLoaded", function (_event) {
+    document.body.classList.add('hypothesis-enabled');
+  });
+</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<meta name="citation_title" content="Spatial Analysis on School Inequalities in Brunei Darussalam Using Bayesian Hierarchical Modelling">
+<meta name="citation_abstract" content="Understanding the spatial distribution of schools is essential for promoting equitable access to education. This study investigates spatial disparities in school availability across Brunei Darussalam, with the aim of identifying potentially underserved areas. An initial exploratory data analysis (EDA) was conducted to examine school counts across mukims. The core analysis applie Bayesian spatial Poisson model using Integrated Nested Laplace Approximation (INLA) to estimate the relative abundance of schools, adjusting for expected counts based on population, geographic area, and a socioeconomic indicator (median house price, partially simulated). Both spatially structured and unstructured random effects were included to account for latent spatial processes. Posterior estimates revealed several mukims with significantly lower school availability relative to the national baseline, offering valuable insights to support future policy planning and equitable school placement.
+">
+<meta name="citation_author" content="Alvin Bong">
+<meta name="citation_language" content="en">
+<meta name="citation_reference" content="citation_title=Transforming our world: The 2030 agenda for sustainable development;,citation_author=United Nations General Assembly;,citation_publication_date=2015;,citation_cover_date=2015;,citation_year=2015;,citation_fulltext_html_url=https://sustainabledevelopment.un.org/post2015/transformingourworld;">
+<meta name="citation_reference" content="citation_title=Brunei darussalam long-term development plan. Wawasan brunei 2035;,citation_author=Government Brunei Darussalam;,citation_publication_date=2020;,citation_cover_date=2020;,citation_year=2020;">
+<meta name="citation_reference" content="citation_title=The interpretation of statistical maps;,citation_author=Patrick AP Moran;,citation_publication_date=1948;,citation_cover_date=1948;,citation_year=1948;,citation_fulltext_html_url=https://www.jstor.org/stable/2983777;,citation_issue=2;,citation_volume=10;,citation_journal_title=Journal of the Royal Statistical Society. Series B (Methodological);,citation_publisher=JSTOR;">
+<meta name="citation_reference" content="citation_title=Spatial statistics for data science: Theory and practice with r;,citation_author=Paula Moraga;,citation_publication_date=2023;,citation_cover_date=2023;,citation_year=2023;,citation_fulltext_html_url=https://www.paulamoraga.com/book-spatial/;">
+<meta name="citation_reference" content="citation_title=Bruneimap: Maps and Spatial Data of Brunei (R package version 0.3.1.9001);,citation_author=Haziq Jamil;,citation_publication_date=2025;,citation_cover_date=2025;,citation_year=2025;,citation_fulltext_html_url=https://bruneiverse.github.io/bruneimap/;">
+<meta name="citation_reference" content="citation_title=From Archives to AI: Residential Property Data Across Three Decades in Brunei Darussalam;,citation_author=Haziq Jamil;,citation_author=Amira Barizah Noorosmawie;,citation_author=Hafeezul Waezz Rabu;,citation_author=Lutfi Abdul Razak;,citation_publication_date=2025-03-23;,citation_cover_date=2025-03-23;,citation_year=2025;,citation_fulltext_html_url=https://bruneiverse.github.io/house-data/;,citation_doi=10.1016/j.dib.2025.111505;,citation_language=en;,citation_journal_title=Data in Brief;">
+<meta name="citation_reference" content="citation_title=Overview of education in brunei darussalam;,citation_author=Syazana Ebil;,citation_author=Masitah Shahrill;,citation_publication_date=2023;,citation_cover_date=2023;,citation_year=2023;,citation_doi=10.1007/978-981-16-8136-3_46-1;,citation_inbook_title=International handbook on education in south east asia;">
+<meta name="citation_reference" content="citation_title=Education in brunei;,citation_author=Sharbawi Salbrina;,citation_author=David Deterding;,citation_author=Mohamad Nur Raihan;,citation_publication_date=2024;,citation_cover_date=2024;,citation_year=2024;,citation_doi=10.1007/978-3-031-60303-7_2;,citation_inbook_title=Brunei english: A new variety in a multilingual society;">
+<meta name="citation_reference" content="citation_title=The development and growth of inclusive education in brunei darussalam;,citation_author=Siti Norhedayah Abdul Latif;,citation_author=Rohani Matzin;,citation_author=Aurelia Escoto-Kemp;,citation_publication_date=2021;,citation_cover_date=2021;,citation_year=2021;,citation_doi=10.1007/978-3-030-77119-5_8;,citation_journal_title=Globalisation, Education, and Reform in Brunei Darussalam;,citation_publisher=Springer;">
+<meta name="citation_reference" content="citation_title=Towards wawasan brunei 2035: Early childhood education and development in brunei darussalam;,citation_author=Hanapi Mohamad;,citation_author=Rosyati M Yaakub;,citation_author=Emma Claire Pearson;,citation_author=Jennifer Tan Poh Sim;,citation_publication_date=2018;,citation_cover_date=2018;,citation_year=2018;,citation_doi=10.1007/978-94-024-0927-7_25;,citation_journal_title=International handbook of early childhood education;,citation_publisher=Springer;">
+<meta name="citation_reference" content="citation_title=Towards the analysis of massive multiplayer online role-playing games;,citation_author=Van Jacobson;,citation_publication_date=1999-06;,citation_cover_date=1999-06;,citation_year=1999;,citation_volume=6;,citation_journal_title=Journal of Ubiquitous Information;">
+<meta name="citation_reference" content="citation_title=A methodology for the study of the location-identity split;,citation_author=Fredrick P. Brooks;,citation_author=John Kubiatowicz;,citation_author=Christos Papadimitriou;,citation_publication_date=1997-06;,citation_cover_date=1997-06;,citation_year=1997;,citation_conference_title=Proceedings of OOPSLA;">
+<meta name="citation_reference" content="citation_title=The UNIVAC computer no longer considered harmful;,citation_author=Ivan Sutherland;,citation_author=undefined Nehru;,citation_publication_date=2003-01;,citation_cover_date=2003-01;,citation_year=2003;,citation_volume=6;,citation_journal_title=Journal of Distributed Models;">
+<meta name="citation_reference" content="citation_title=The influence of concurrent archetypes on networking;,citation_author=undefined Taylor;,citation_publication_date=2003-05;,citation_cover_date=2003-05;,citation_year=2003;,citation_conference_title=Proceedings of PODS;">
+<meta name="citation_reference" content="citation_title=An analysis of forward-error correction using MollSextans;,citation_author=Karthik Lakshminarayanan;,citation_publication_date=2001-06;,citation_cover_date=2001-06;,citation_year=2001;,citation_conference_title=Proceedings of the Symposium on stable configurations;">
+<meta name="citation_reference" content="citation_title=Enabling the transistor using secure algorithms;,citation_author=undefined Smith;,citation_author=Leonard Adleman;,citation_publication_date=1990-03;,citation_cover_date=1990-03;,citation_year=1990;,citation_technical_report_institution=IBM Research;,citation_technical_report_number=99-74-1618;">
+</head>
+
+<body class="quarto-light">
+
+<header id="title-block-header" class="quarto-title-block default toc-left page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Spatial Analysis on School Inequalities in Brunei Darussalam Using Bayesian Hierarchical Modelling</h1>
+          </div>
+
+    
+    <div class="quarto-title-meta-container">
+      <div class="quarto-title-meta-column-start">
+        
+        <div class="quarto-title-meta">
+
+                <div>
+            <div class="quarto-title-meta-heading">Author</div>
+            <div class="quarto-title-meta-contents">
+                        <p>Alvin Bong <a href="mailto:alvinbongjl@gmail.com" class="quarto-title-author-email"><i class="bi bi-envelope"></i></a> </p>
+                      </div>
+          </div>
+                
+          
+                <div>
+            <div class="quarto-title-meta-heading">Modified</div>
+            <div class="quarto-title-meta-contents">
+              <p class="date-modified">October 1, 2025</p>
+            </div>
+          </div>
+                
+              </div>
+      </div>
+      <div class="quarto-title-meta-column-end quarto-other-formats-target">
+      <div class="quarto-alternate-formats"><div class="quarto-title-meta-heading">Other Formats</div><div class="quarto-title-meta-contents"><p><a href="index.pdf"><i class="bi bi-file-pdf"></i>PDF</a></p></div><div class="quarto-title-meta-contents"><p><a href="index.docx"><i class="bi bi-file-word"></i>MS Word</a></p></div></div></div>
+    </div>
+
+    <div>
+      <div class="abstract">
+        <div class="block-title">Abstract</div>
+        <p>Understanding the spatial distribution of schools is essential for promoting equitable access to education. This study investigates spatial disparities in school availability across Brunei Darussalam, with the aim of identifying potentially underserved areas. An initial exploratory data analysis (EDA) was conducted to examine school counts across mukims. The core analysis applie Bayesian spatial Poisson model using Integrated Nested Laplace Approximation (INLA) to estimate the relative abundance of schools, adjusting for expected counts based on population, geographic area, and a socioeconomic indicator (median house price, partially simulated). Both spatially structured and unstructured random effects were included to account for latent spatial processes. Posterior estimates revealed several mukims with significantly lower school availability relative to the national baseline, offering valuable insights to support future policy planning and equitable school placement.</p>
+      </div>
+    </div>
+
+
+    <div class="quarto-other-links-text-target">
+    <div class="quarto-code-links"><div class="quarto-title-meta-heading">Code Links</div><div class="quarto-title-meta-contents"><span><a href="https://github.com/alvinbjl/school-disparity-areal-model/" target="_blank"><i class="bi bi-github"></i>GitHub Repo</a></span></div></div></div>  </div>
+</header><div id="quarto-content" class="page-columns page-rows-contents page-layout-article toc-left">
+<div id="quarto-sidebar-toc-left" class="sidebar toc-left">
+  <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="2">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction"><span class="header-section-number">1</span> Introduction</a></li>
+  <li><a href="#data" id="toc-data" class="nav-link" data-scroll-target="#data"><span class="header-section-number">2</span> Data</a></li>
+  <li><a href="#sec-method" id="toc-sec-method" class="nav-link" data-scroll-target="#sec-method"><span class="header-section-number">3</span> Method</a>
+  <ul class="collapse">
+  <li><a href="#spatial-regression-model" id="toc-spatial-regression-model" class="nav-link" data-scroll-target="#spatial-regression-model"><span class="header-section-number">3.1</span> Spatial regression model</a></li>
+  <li><a href="#global-morans-i" id="toc-global-morans-i" class="nav-link" data-scroll-target="#global-morans-i"><span class="header-section-number">3.2</span> Global Moran’s I</a></li>
+  </ul></li>
+  <li><a href="#sec-results" id="toc-sec-results" class="nav-link" data-scroll-target="#sec-results"><span class="header-section-number">4</span> Results</a>
+  <ul class="collapse">
+  <li><a href="#exploratory-data-analysis" id="toc-exploratory-data-analysis" class="nav-link" data-scroll-target="#exploratory-data-analysis"><span class="header-section-number">4.1</span> Exploratory Data Analysis</a></li>
+  <li><a href="#model" id="toc-model" class="nav-link" data-scroll-target="#model"><span class="header-section-number">4.2</span> Model</a></li>
+  </ul></li>
+  <li><a href="#discussion" id="toc-discussion" class="nav-link" data-scroll-target="#discussion"><span class="header-section-number">5</span> Discussion</a>
+  <ul class="collapse">
+  <li><a href="#limitations" id="toc-limitations" class="nav-link" data-scroll-target="#limitations"><span class="header-section-number">5.1</span> Limitations</a></li>
+  </ul></li>
+  <li><a href="#sec-conc" id="toc-sec-conc" class="nav-link" data-scroll-target="#sec-conc"><span class="header-section-number">6</span> Conclusions</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
+  </ul>
+</nav>
+</div>
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+</div>
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+  
+
+
+<section id="introduction" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="introduction"><span class="header-section-number">1</span> Introduction</h2>
+<p>Education is a foundational pillar of national development and its people, influencing social well-being, economic growth, and long-term sustainability. The global significance of education is recognized in Sustainable Development Goal 4, which promotes inclusive and equitable quality education for all <span class="citation" data-cites="UNGA2015transform">(<a href="#ref-UNGA2015transform" role="doc-biblioref">Assembly 2015</a>)</span>. Nationally, Brunei Darussalam’s national vision, Wawasan Brunei 2035, positions education as a cornerstone of the country’s long-term development goals <span class="citation" data-cites="GovernmentBruneiNDwawasan">(<a href="#ref-GovernmentBruneiNDwawasan" role="doc-biblioref">Brunei Darussalam 2020</a>)</span>. Ensuring equitable access to education through sufficient infrastructure and fair resource distribution is critical to delivering quality learning experiences.</p>
+<p>While several studies have examined general aspects of education in Brunei, there have been limited studies based on quantitative methods <span class="citation" data-cites="ebil2023overview abdul2021development salbrina2024education mohamad2018towards">(<a href="#ref-ebil2023overview" role="doc-biblioref">Ebil and Shahrill 2023</a>; <a href="#ref-abdul2021development" role="doc-biblioref">Abdul Latif, Matzin, and Escoto-Kemp 2021</a>; <a href="#ref-salbrina2024education" role="doc-biblioref">Salbrina, Deterding, and Nur Raihan 2024</a>; <a href="#ref-mohamad2018towards" role="doc-biblioref">Mohamad et al. 2018</a>)</span>. This project aims to addresses that gap by conducting spatial analysis on schools across the mukims in Brunei, specifically using Bayesian hierarchical models to identify adminstrative regions in Brunei where school availability falls significantly below the national baseline, supporting future policy planning and school placements.</p>
+<!-- The rest of this paper is organized as follows. In section -->
+<!-- [2](#sec-method){reference-type="ref" reference="sec-method"}, we -->
+<!-- describe the methodology used. In section -->
+<!-- [3](#sec-results){reference-type="ref" reference="sec-results"}, the -->
+<!-- results are shown. In section [4](#sec-conc){reference-type="ref" -->
+<!-- reference="sec-conc"}, we conclude. -->
+</section>
+<section id="data" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="data"><span class="header-section-number">2</span> Data</h2>
+<p>This study focuses exclusively on government primary and secondary schools in Brunei Darussalam, as these institutions serve as the main access points to education for most youth. Bayesian spatial modeling was conducted using Brunei’s 39 mukims (administrative region) as the unit of analysis to achieve a balance between geographic detail and interpretability. Key data variables that were used include <em>school counts</em>, <em>administrative boundary data</em>, <em>population</em>, and <em>house prices</em>. These datasets were mostly sourced from Bruneiverse Github Page, particularly via the <code>bruneimap</code> R package, and were subsequently cleaned, wrangled, and merged primarily using <code>left_join()</code> and <code>rbind()</code> <span class="citation" data-cites="bruneimap jamil2025archives">(<a href="#ref-bruneimap" role="doc-biblioref">Jamil 2025</a>; <a href="#ref-jamil2025archives" role="doc-biblioref">Jamil et al. 2025</a>)</span>.</p>
+<p>The school dataset from 2018 was used as it is the most recent year for which disaggregated school-level data is available. Although more recent statistics exist, they are published only in summary form. Population data is drawn from the 2021 national census, the most recent census available in Brunei, despite the mismatch in years with the school dataset. Brunei conducts its national census every ten years, making the 2021 data the best option for population estimates.</p>
+<p>To incorporate a socioeconomic indicator, we used median house prices derived from approximately 30,000 property listings spanning 1993–2025. These were calculated at the mukim level and included as a covariate in the Bayesian model. In cases where house price data were missing, values were imputed using predictions from an INLA-based Gaussian model. Manual imputations based on local knowledge were initially tested, but the INLA-predicted values were ultimately adopted, as both methods produced similar model outcomes. Given the nature of the data, house prices were treated as partially simulated estimates and may not fully reflect actual market values.</p>
+</section>
+<section id="sec-method" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="sec-method"><span class="header-section-number">3</span> Method</h2>
+<p>Choropath map is used for exploratory data analysis to give an overview of school counts per mukim and overall geography of Brunei.</p>
+<section id="spatial-regression-model" class="level3" data-number="3.1">
+<h3 data-number="3.1" class="anchored" data-anchor-id="spatial-regression-model"><span class="header-section-number">3.1</span> Spatial regression model</h3>
+<p>Let <span class="math inline">\(Y_i\)</span> and <span class="math inline">\(E_i\)</span> denote the observed and expected counts of schools, respectively, in mukim <span class="math inline">\(i \in \{1, \dotsc, n\}\)</span>. Let <span class="math inline">\(\theta_i\)</span> represent the <em>relative abundance</em> of schools in mukim <span class="math inline">\(i\)</span>, analogous to a relative risk in disease mapping. The model is specified as follow:</p>
+<p><span class="math display">\[
+Y_i \mid \theta_i \sim \text{Poisson}(E_i \cdot \theta_i), \quad i = 1, \dotsc, n
+\]</span></p>
+<p><span class="math display">\[
+\log(\theta_i) = \beta_0 + \beta_1 \cdot \text{pop}_i + \beta_2 \cdot \text{area}_i + \beta_3 \cdot \text{hp}_i + u_i + v_i,
+\]</span></p>
+<p>where:</p>
+<ul>
+<li><span class="math inline">\(\beta_0\)</span> is the intercept,</li>
+<li><span class="math inline">\(\beta_1\)</span>, <span class="math inline">\(\beta_2\)</span>, and <span class="math inline">\(\beta_3\)</span> are regression coefficients for the standardized covariates:
+<ul>
+<li><span class="math inline">\(\text{pop}_i\)</span>: population (in units of 10,000),</li>
+<li><span class="math inline">\(\text{area}_i\)</span>: mukim size (in units of 10 km²),</li>
+<li><span class="math inline">\(\text{hp}_i\)</span>: median house price (in BND $1,000,000),</li>
+</ul></li>
+<li><span class="math inline">\(u_i\)</span> is a structured spatial effect, modelled using an intrinsic conditional autoregressive (CAR) prior <span class="math inline">\(u_i \mid u_{-i} \sim \mathcal{N}(\bar{u}_{\delta_i}, \frac{1}{\tau_u n_{\delta_i}})\)</span></li>
+<li><span class="math inline">\(v_i\)</span> is an unstructured random effect, <span class="math inline">\(v_i \sim \text{Normal}(0, \frac{1}{\tau_v})\)</span></li>
+</ul>
+<p>The spatial random effect <span class="math inline">\(u_i\)</span> requires a neighborhood (adjacency) matrix. Here, We define two mukims as neighbors if they share at least one boundary point (Queen contiguity). The neighborhood graph is constructed using the <code>poly2nb()</code> function from the <code>spdep</code> package.</p>
+<p>Model fitting was performed in a Bayesian framework using the Integrated Nested Laplace Approximation (INLA). Model adequacy with respect to spatial structure is assessed by by examining the spatial autocorrelation ofstandardiszed Pearson residual defined as: <span class="math display">\[residual_i = \dfrac{Y_i - \mu_i}{\sqrt{\mu_i}} = \dfrac{Y_i - E_i \cdot \theta_i}{\sqrt{E_i \cdot \theta_i}},\]</span> where <span class="math inline">\(Y_i\)</span> is the observed count, <span class="math inline">\(E_i\)</span> is the expected count (offset), and <span class="math inline">\(\theta_i\)</span> is the relative risk. Significant residual spatial autocorrelation may indicate unaccounted spatial structure in the model.</p>
+</section>
+<section id="global-morans-i" class="level3" data-number="3.2">
+<h3 data-number="3.2" class="anchored" data-anchor-id="global-morans-i"><span class="header-section-number">3.2</span> Global Moran’s I</h3>
+<p>To examine whether Pearson residuals of our model exhibit a clustered, dispersed, or random spatial pattern, we apply the Global Moran’s I test using the <code>global_moran_test()</code> function from the <code>spdep</code> package. This test is computed for each mukim in the study area, indexed by <span class="math inline">\(i, j = 1, 2, \ldots, N\)</span>. The Moran’s I test statistic is defined as follows:</p>
+<p><span class="math display">\[
+I = \frac{N}{\sum_{i=1}^N \sum_{j=1}^N w_{ij}} \frac{\sum_{i=1}^N \sum_{j=1}^N w_{ij} (x_i - \bar{x})(x_j - \bar{x})}{\sum_{i=1}^N (x_i - \bar{x})^2} \in [-1,1],
+\]</span></p>
+<p>where:</p>
+<ul>
+<li><span class="math inline">\(x_i\)</span> is the Pearson residual in mukim <span class="math inline">\(i\)</span>,</li>
+<li><span class="math inline">\(\bar{x}\)</span> is the mean residual per mukim,</li>
+<li><span class="math inline">\(w_{ij}\)</span> is the spatial weight between mukims <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span>.</li>
+</ul>
+<p>For simplicity, the same Queen Contiguity neighbour is used. Moran’s I values are standardized, with values close to <span class="math inline">\(+1\)</span> indicating positive spatial autocorrelation (i.e., clustering), where high or low values are near each other. Values close to <span class="math inline">\(-1\)</span> indicate negative spatial autocorrelation (i.e., dispersion), where neighboring values differ significantly. Values near <span class="math inline">\(0\)</span> suggest randomness, indicating an absence of spatial pattern. <a href="#fig-autocorrelation" class="quarto-xref">Figure&nbsp;1</a> shows the three configurations of areas.</p>
+<div id="fig-autocorrelation" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-autocorrelation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="source/autocorrelation.jpg" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;1: Examples of configurations of areas showing different types of spatial autocorrelation"><img src="source/autocorrelation.jpg" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-autocorrelation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Examples of configurations of areas showing different types of spatial autocorrelation
+</figcaption>
+</figure>
+</div>
+<p>To determine the significance of the Moran’s I statistic, we employ the Central Limit Theorem to calculate p-values based on a Z-score, allowing us to test the following hypotheses:</p>
+<ul>
+<li><span class="math inline">\(H_0: I = 0\)</span> (no spatial autocorrelation),</li>
+<li><span class="math inline">\(H_1: I \neq 0\)</span> (presence of spatial autocorrelation).</li>
+</ul>
+</section>
+</section>
+<section id="sec-results" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="sec-results"><span class="header-section-number">4</span> Results</h2>
+<section id="exploratory-data-analysis" class="level3" data-number="4.1">
+<h3 data-number="4.1" class="anchored" data-anchor-id="exploratory-data-analysis"><span class="header-section-number">4.1</span> Exploratory Data Analysis</h3>
+<p><a href="#fig-sch" class="quarto-xref">Figure&nbsp;2</a> shows that mukims with higher schools count located in the coastal region near South China Sea. As expected, majority of mukims with high school count are in Brunei-Muara District (north-east of mainland), the most populated and urban district in Brunei.</p>
+<div id="cell-fig-sch" class="cell">
+<div class="cell-output-display">
+<div id="fig-sch" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-sch-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="index_files/figure-html/fig-sch-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="Figure&nbsp;2: Choropleth Map of school count by mukim. Grey boundaries denote mukim. Red boundaries are the 4 districts in Brunei."><img src="index_files/figure-html/fig-sch-1.png" class="img-fluid figure-img" width="672"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-sch-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Choropleth Map of school count by mukim. Grey boundaries denote mukim. Red boundaries are the 4 districts in Brunei.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="model" class="level3" data-number="4.2">
+<h3 data-number="4.2" class="anchored" data-anchor-id="model"><span class="header-section-number">4.2</span> Model</h3>
+<p>The model results show that the intercept is estimated at <span class="math inline">\(\hat{\beta}_0 = 1.077\)</span>, with a 95% credible interval of <span class="math inline">\((0.239, 1.894)\)</span>. The coefficient for population, <span class="math inline">\(\beta_1 = -0.436\)</span>, with a 95% credible interval of <span class="math inline">\((-0.579, -0.295)\)</span>, indicates a statistically significant negative relationship between population size and relative school abundance. Specifically, for every 10,000 increase in population, the relative abundance of schools decreases by approximately 35%, since <span class="math inline">\(\exp(-0.436) \approx 0.647\)</span>. In contrast, the covariates: mukim size and house price are not statistically significant. The coefficient for mukim size is <span class="math inline">\(\hat{\beta_2}=0.015\)</span> (95% CI: -0.002, 0.032), and for house price is <span class="math inline">\(\hat{\beta_3}=-0.759\)</span> (95% CI: -3.174, 1.704).</p>
+<p>The estimated relative abundance (RA) of schools across mukims (<a href="#fig-ra" class="quarto-xref">Figure&nbsp;3</a>)vindicates lower values in the northern coastal mukims, particularly in northern Brunei-Muara District, along the South China Sea. Conversely, higher RA values appear inland, especially in less densely populated regions.</p>
+<p>To identify mukims with potentially inadequate school provision, non-exceedence probabilities were computed for a threshold of <span class="math inline">\(RA &lt;0.7\)</span>. The analysis (<a href="#fig-exc" class="quarto-xref">Figure&nbsp;4</a>) indicates that it is highly likely that several mukims fall below this threshold, including <strong>Mukim Sengkurong, Mukim Gadong A, Mukim Gadong B, Mukim Berakas B, and Mukim Mentiri</strong>.</p>
+<p>Lastly, the global Moran’s I statistic of <span class="math inline">\(0.213\)</span> (<span class="math inline">\(p&lt;0.05\)</span>) provides statistically significant evidence to reject the null hypothesis of no spatial autocorrelation in the residuals.</p>
+<div id="cell-fig-ra" class="cell">
+<div class="cell-output-display">
+<div id="fig-ra" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ra-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="index_files/figure-html/fig-ra-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3" title="Figure&nbsp;3: Relative Abudance of Schools in each mukim."><img src="index_files/figure-html/fig-ra-1.png" class="img-fluid figure-img" width="672"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ra-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: Relative Abudance of Schools in each mukim.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div id="cell-fig-exc" class="cell">
+<div class="cell-output-display">
+<div id="fig-exc" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-exc-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="index_files/figure-html/fig-exc-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-4" title="Figure&nbsp;4: Mukims with non-exceedance probability of Relative Aboundance < 0.7"><img src="index_files/figure-html/fig-exc-1.png" class="img-fluid figure-img" width="672"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-exc-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4: Mukims with non-exceedance probability of Relative Aboundance &lt; 0.7
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div id="cell-fig-res" class="cell">
+<div class="cell-output-display">
+<div id="fig-res" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-res-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="index_files/figure-html/fig-res-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-5" title="Figure&nbsp;5: Map of Pearson Residual"><img src="index_files/figure-html/fig-res-1.png" class="img-fluid figure-img" width="672"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-res-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5: Map of Pearson Residual
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="discussion" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="discussion"><span class="header-section-number">5</span> Discussion</h2>
+<p>The results in <a href="#sec-results" class="quarto-xref">Section&nbsp;4</a> offer insights into both overall model performance and patterns of educational equity. Global Moran’s I statistic (0.213) is not substantially high (&lt;0.3), suggesting that the model captures most, but not all, of the residual spatial dependence. This is illustrated in <a href="#fig-res" class="quarto-xref">Figure&nbsp;5</a>, where the variation in residual colors suggests a reasonably good fit, though further improvement may be possible with additional spatial covariates or refined random effects. The negative relationship between population and school counts, as well as higher RA values in inland (rural) mukims than coastal ares with larger population suggests that school availability in rural mukims seem to be adequate, potentially due to legacy planning policies or intentional efforts to ensure equitable access in remote areas.</p>
+<p>In contrast, urban and peri-urban mukims in the Brunei-Muara District, the country’s most densely populated and economically active region, show signs of disparities in school access. Notably, the high non-exceedance probability of <span class="math inline">\(RA &lt; 0.7\)</span> in <strong>Mukim Sengkurong, Gadong A &amp; B, Berakas B, and Mentiri</strong> indicates that they have fewer schools than expected relative to their population sizes. These disparities highlight areas that may be underinvested in educational infrastructure, warranting closer policy attention.</p>
+<p>Importantly, these mukims are also encompass several new government housing developments, such as Perpindahan Lugu and Perpindahan Tanah Jambu. This suggests a potential planning gap, where population is increasing due to housing developments, but educational infrastructure has not yet caught up.</p>
+<p>However, inspection of <a href="#fig-sch" class="quarto-xref">Figure&nbsp;2</a> reveals that these areas have a similar number of schools compared to their neighboring mukims. This suggests that while the absolute number of schools may not be unusually low, the rapid increase in population within these new housing areas may have outpaced school capacity, leading to a situation where demand exceeds supply within these specific zones.</p>
+<p>Nevertheless, this situation represents a strategic opportunity. Prioritizing school construction in these fast-growing neighborhoods could significantly improve access to education, reduce commute times, lower transportation costs, and enhance the overall quality of life for residents. Locating schools closer to homes supports national goals related to sustainable urban development, walkability, and equity in public services.</p>
+<section id="limitations" class="level3" data-number="5.1">
+<h3 data-number="5.1" class="anchored" data-anchor-id="limitations"><span class="header-section-number">5.1</span> Limitations</h3>
+<p>This study is limited to public schools, excluding private and international institutions that may affect school availability in some areas. The data is from 2018, potentially missing recent changes, especially in fast-growing neighborhoods. Next, our model used the general population data and is not age-standardized, are important for demand estimation. Housing price was used as a proxy for socioeconomic status, but data relies on listing prices, which may not reflect actual market values due to negotiation factors. In some areas, price data was also simulated, introducing further uncertainty. <!-- have not taken into account school size/ assume schools are all same size --></p>
+</section>
+</section>
+<section id="sec-conc" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="sec-conc"><span class="header-section-number">6</span> Conclusions</h2>
+<p>In summary, our model reveals a negative relationship between population size and relative school abundance, suggesting urban areas have fewer schools per capita than rural ones. Several mukims in the Brunei-Muara District, including Sengkurong, Gadong A &amp; B, Berakas B, and Mentiri, appear to have fewer schools than expected, despite ongoing population growth driven by new housing developments. While total school counts may seem adequate, local demand in these areas may exceed capacity. Addressing this gap offers a strategic opportunity to improve access, reduce travel time, and support equitable urban planning.</p>
+</section>
+<section id="references" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="references">References</h2>
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-abdul2021development" class="csl-entry" role="listitem">
+Abdul Latif, Siti Norhedayah, Rohani Matzin, and Aurelia Escoto-Kemp. 2021. <span>“The Development and Growth of Inclusive Education in Brunei Darussalam.”</span> <em>Globalisation, Education, and Reform in Brunei Darussalam</em>, 151–75. <a href="https://doi.org/10.1007/978-3-030-77119-5_8">https://doi.org/10.1007/978-3-030-77119-5_8</a>.
+</div>
+<div id="ref-UNGA2015transform" class="csl-entry" role="listitem">
+Assembly, United Nations General. 2015. <span>“Transforming Our World: The 2030 Agenda for Sustainable Development.”</span> <a href="https://sustainabledevelopment.un.org/post2015/transformingourworld">https://sustainabledevelopment.un.org/post2015/transformingourworld</a>.
+</div>
+<div id="ref-GovernmentBruneiNDwawasan" class="csl-entry" role="listitem">
+Brunei Darussalam, Government of. 2020. <span>“Brunei Darussalam Long-Term Development Plan. Wawasan Brunei 2035.”</span>
+</div>
+<div id="ref-ebil2023overview" class="csl-entry" role="listitem">
+Ebil, Syazana, and Masitah Shahrill. 2023. <span>“Overview of Education in Brunei Darussalam.”</span> In <em>International Handbook on Education in South East Asia</em>, 1–21. Springer. <a href="https://doi.org/10.1007/978-981-16-8136-3_46-1">https://doi.org/10.1007/978-981-16-8136-3_46-1</a>.
+</div>
+<div id="ref-bruneimap" class="csl-entry" role="listitem">
+Jamil, Haziq. 2025. <em>Bruneimap: <span>M</span>aps and <span>S</span>patial <span>D</span>ata of <span>B</span>runei (<span>R</span> Package Version 0.3.1.9001)</em>. <a href="https://bruneiverse.github.io/bruneimap/">https://bruneiverse.github.io/bruneimap/</a>.
+</div>
+<div id="ref-jamil2025archives" class="csl-entry" role="listitem">
+Jamil, Haziq, Amira Barizah Noorosmawie, Hafeezul Waezz Rabu, and Lutfi Abdul Razak. 2025. <span>“From <span>Archives</span> to <span>AI:</span> <span>Residential</span> <span>Property</span> <span>Data</span> <span>Across</span> <span>Three</span> <span>Decades</span> in <span>Brunei</span> <span>Darussalam</span>.”</span> <em>Data in Brief</em>, March. <a href="https://doi.org/10.1016/j.dib.2025.111505">https://doi.org/10.1016/j.dib.2025.111505</a>.
+</div>
+<div id="ref-mohamad2018towards" class="csl-entry" role="listitem">
+Mohamad, Hanapi, Rosyati M Yaakub, Emma Claire Pearson, and Jennifer Tan Poh Sim. 2018. <span>“Towards Wawasan Brunei 2035: Early Childhood Education and Development in Brunei Darussalam.”</span> <em>International Handbook of Early Childhood Education</em>, 551–67. <a href="https://doi.org/10.1007/978-94-024-0927-7_25">https://doi.org/10.1007/978-94-024-0927-7_25</a>.
+</div>
+<div id="ref-salbrina2024education" class="csl-entry" role="listitem">
+Salbrina, Sharbawi, David Deterding, and Mohamad Nur Raihan. 2024. <span>“Education in Brunei.”</span> In <em>Brunei English: A New Variety in a Multilingual Society</em>, 17–32. Springer. <a href="https://doi.org/10.1007/978-3-031-60303-7_2">https://doi.org/10.1007/978-3-031-60303-7_2</a>.
+</div>
+</div>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
+(function() {
+  let previousOnload = window.onload;
+  window.onload = () => {
+    if (previousOnload) {
+      previousOnload();
+    }
+    lightboxQuarto.on('slide_before_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      const href = trigger.getAttribute('href');
+      if (href !== null) {
+        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+        if (imgEl !== null) {
+          const srcAttr = imgEl.getAttribute("src");
+          if (srcAttr && srcAttr.startsWith("data:")) {
+            slideConfig.href = srcAttr;
+          }
+        }
+      } 
+    });
+  
+    lightboxQuarto.on('slide_after_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(slideNode);
+      }
+    });
+  
+  };
+  
+})();
+          </script>
+
+
+
+
+</body></html>
