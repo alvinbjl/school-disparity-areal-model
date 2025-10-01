@@ -216,6 +216,7 @@ label_sf <- brn_mkm_sch_sf |>
 ggplot() +
   geom_sf(data = brn_mkm_sch_sf, aes(fill = schools)) +
   geom_sf(data = mkm_sf, color="grey", alpha=0, linewidth=0.7) +
+  geom_sf(data = dis_sf, color="red", alpha=0, linewidth=0.5) +
   ggrepel::geom_label_repel(
     data = label_sf,
     aes(label = label, geometry = geometry),
@@ -777,6 +778,7 @@ label_sf <- brn_mkm_sch_sf |>
 ggplot() +
   geom_sf(data = brn_mkm_sch_sf, aes(fill = exc)) +
   geom_sf(data = mkm_sf, color="grey", alpha=0, linewidth=0.7) +
+  geom_sf(data = sch_sf) +
   ggrepel::geom_label_repel(
     data = label_sf,
     aes(label = label, geometry = geometry),
@@ -815,6 +817,19 @@ moran.test(residuals_pearson, lw)
 
 my_palette <- colorRampPalette(brewer.pal(11, "RdBu"))(100)
 mapview(brn_mkm_sch_sf, zcol="residuals_pearson", col.regions = my_palette, at = seq(-1, 3, length.out = 101))
+ggplot() +
+  geom_sf(data = brn_mkm_sch_sf, aes(fill = residuals_pearson)) +
+  geom_sf(data = mkm_sf, color="grey", alpha=0, linewidth=0.7) +
+  scale_fill_viridis_b(
+    option = "E",
+    direction = 1,
+    name = "Residual",
+    na.value = NA,
+    n.breaks = 6    # Number of bins
+  ) +
+  labs(x = NULL, y = NULL) +
+  theme_minimal()
+
 
 # EXTRA:
 # Sarawak
