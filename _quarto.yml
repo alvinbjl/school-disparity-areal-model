@@ -16,7 +16,7 @@ format:
     toc-expand: 2
     toc-location: left
     # code-fold: true
-    # embed-resources: true
+    embed-resources: true
     number-sections: true
     comments:
       hypothesis: true
