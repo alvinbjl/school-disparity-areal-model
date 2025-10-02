@@ -96,7 +96,7 @@ window.Quarto = {
 </script>
 
 <meta name="citation_title" content="Spatial Analysis on School Inequalities in Brunei Darussalam Using Bayesian Hierarchical Modelling">
-<meta name="citation_abstract" content="Understanding the spatial distribution of schools is essential for promoting equitable access to education. This study investigates spatial disparities in school availability across Brunei Darussalam, with the aim of identifying potentially underserved areas. An initial exploratory data analysis (EDA) was conducted to examine school counts across mukims. The core analysis applie Bayesian spatial Poisson model using Integrated Nested Laplace Approximation (INLA) to estimate the relative abundance of schools, adjusting for expected counts based on population, geographic area, and a socioeconomic indicator (median house price, partially simulated). Both spatially structured and unstructured random effects were included to account for latent spatial processes. Posterior estimates revealed several mukims with significantly lower school availability relative to the national baseline, offering valuable insights to support future policy planning and equitable school placement.
+<meta name="citation_abstract" content="Understanding the spatial distribution of schools is essential for promoting equitable access to education. This study investigates spatial disparities in school availability across Brunei Darussalam, with the aim of identifying potentially underserved areas. An initial exploratory data analysis (EDA) was conducted to examine school counts across mukims. The core analysis applie Bayesian spatial Poisson model using Integrated Nested Laplace Approximation (INLA) to estimate the relative abundance of schools, adjusting for expected counts based on population, size of geographic area, and a socioeconomic indicator (median house price, partially simulated). Both spatially structured and unstructured random effects were included to account for latent spatial processes. Posterior estimates revealed several mukims with significantly lower school availability relative to the national baseline, offering valuable insights to support future policy planning and equitable school placement.
 ">
 <meta name="citation_author" content="Alvin Bong">
 <meta name="citation_language" content="en">
@@ -143,7 +143,7 @@ window.Quarto = {
                 <div>
             <div class="quarto-title-meta-heading">Modified</div>
             <div class="quarto-title-meta-contents">
-              <p class="date-modified">October 1, 2025</p>
+              <p class="date-modified">October 2, 2025</p>
             </div>
           </div>
                 
@@ -156,7 +156,7 @@ window.Quarto = {
     <div>
       <div class="abstract">
         <div class="block-title">Abstract</div>
-        <p>Understanding the spatial distribution of schools is essential for promoting equitable access to education. This study investigates spatial disparities in school availability across Brunei Darussalam, with the aim of identifying potentially underserved areas. An initial exploratory data analysis (EDA) was conducted to examine school counts across mukims. The core analysis applie Bayesian spatial Poisson model using Integrated Nested Laplace Approximation (INLA) to estimate the relative abundance of schools, adjusting for expected counts based on population, geographic area, and a socioeconomic indicator (median house price, partially simulated). Both spatially structured and unstructured random effects were included to account for latent spatial processes. Posterior estimates revealed several mukims with significantly lower school availability relative to the national baseline, offering valuable insights to support future policy planning and equitable school placement.</p>
+        <p>Understanding the spatial distribution of schools is essential for promoting equitable access to education. This study investigates spatial disparities in school availability across Brunei Darussalam, with the aim of identifying potentially underserved areas. An initial exploratory data analysis (EDA) was conducted to examine school counts across mukims. The core analysis applie Bayesian spatial Poisson model using Integrated Nested Laplace Approximation (INLA) to estimate the relative abundance of schools, adjusting for expected counts based on population, size of geographic area, and a socioeconomic indicator (median house price, partially simulated). Both spatially structured and unstructured random effects were included to account for latent spatial processes. Posterior estimates revealed several mukims with significantly lower school availability relative to the national baseline, offering valuable insights to support future policy planning and equitable school placement.</p>
       </div>
     </div>
 
@@ -179,7 +179,7 @@ window.Quarto = {
   <li><a href="#sec-results" id="toc-sec-results" class="nav-link" data-scroll-target="#sec-results"><span class="header-section-number">4</span> Results</a>
   <ul class="collapse">
   <li><a href="#exploratory-data-analysis" id="toc-exploratory-data-analysis" class="nav-link" data-scroll-target="#exploratory-data-analysis"><span class="header-section-number">4.1</span> Exploratory Data Analysis</a></li>
-  <li><a href="#model" id="toc-model" class="nav-link" data-scroll-target="#model"><span class="header-section-number">4.2</span> Model</a></li>
+  <li><a href="#sec-results-model" id="toc-sec-results-model" class="nav-link" data-scroll-target="#sec-results-model"><span class="header-section-number">4.2</span> Model</a></li>
   </ul></li>
   <li><a href="#discussion" id="toc-discussion" class="nav-link" data-scroll-target="#discussion"><span class="header-section-number">5</span> Discussion</a>
   <ul class="collapse">
@@ -218,7 +218,7 @@ window.Quarto = {
 </section>
 <section id="sec-method" class="level2" data-number="3">
 <h2 data-number="3" class="anchored" data-anchor-id="sec-method"><span class="header-section-number">3</span> Method</h2>
-<p>Choropath map is used for exploratory data analysis to give an overview of school counts per mukim and overall geography of Brunei.</p>
+<p>Choropleth map is used for exploratory data analysis to give an overview of school counts per mukim and overall geography of Brunei.</p>
 <section id="spatial-regression-model" class="level3" data-number="3.1">
 <h3 data-number="3.1" class="anchored" data-anchor-id="spatial-regression-model"><span class="header-section-number">3.1</span> Spatial regression model</h3>
 <p>Let <span class="math inline">\(Y_i\)</span> and <span class="math inline">\(E_i\)</span> denote the observed and expected counts of schools, respectively, in mukim <span class="math inline">\(i \in \{1, \dotsc, n\}\)</span>. Let <span class="math inline">\(\theta_i\)</span> represent the <em>relative abundance</em> of schools in mukim <span class="math inline">\(i\)</span>, analogous to a relative risk in disease mapping. The model is specified as follow:</p>
@@ -293,8 +293,8 @@ Figure&nbsp;2: Choropleth Map of school count by mukim. Grey boundaries denote m
 </div>
 </div>
 </section>
-<section id="model" class="level3" data-number="4.2">
-<h3 data-number="4.2" class="anchored" data-anchor-id="model"><span class="header-section-number">4.2</span> Model</h3>
+<section id="sec-results-model" class="level3" data-number="4.2">
+<h3 data-number="4.2" class="anchored" data-anchor-id="sec-results-model"><span class="header-section-number">4.2</span> Model</h3>
 <p>The model results show that the intercept is estimated at <span class="math inline">\(\hat{\beta}_0 = 1.077\)</span>, with a 95% credible interval of <span class="math inline">\((0.239, 1.894)\)</span>. The coefficient for population, <span class="math inline">\(\beta_1 = -0.436\)</span>, with a 95% credible interval of <span class="math inline">\((-0.579, -0.295)\)</span>, indicates a statistically significant negative relationship between population size and relative school abundance. Specifically, for every 10,000 increase in population, the relative abundance of schools decreases by approximately 35%, since <span class="math inline">\(\exp(-0.436) \approx 0.647\)</span>. In contrast, the covariates: mukim size and house price are not statistically significant. The coefficient for mukim size is <span class="math inline">\(\hat{\beta_2}=0.015\)</span> (95% CI: -0.002, 0.032), and for house price is <span class="math inline">\(\hat{\beta_3}=-0.759\)</span> (95% CI: -3.174, 1.704).</p>
 <p>The estimated relative abundance (RA) of schools across mukims (<a href="#fig-ra" class="quarto-xref">Figure&nbsp;3</a>)vindicates lower values in the northern coastal mukims, particularly in northern Brunei-Muara District, along the South China Sea. Conversely, higher RA values appear inland, especially in less densely populated regions.</p>
 <p>To identify mukims with potentially inadequate school provision, non-exceedence probabilities were computed for a threshold of <span class="math inline">\(RA &lt;0.7\)</span>. The analysis (<a href="#fig-exc" class="quarto-xref">Figure&nbsp;4</a>) indicates that it is highly likely that several mukims fall below this threshold, including <strong>Mukim Sengkurong, Mukim Gadong A, Mukim Gadong B, Mukim Berakas B, and Mukim Mentiri</strong>.</p>
@@ -318,10 +318,10 @@ Figure&nbsp;3: Relative Abudance of Schools in each mukim.
 <div id="fig-exc" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-exc-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="index_files/figure-html/fig-exc-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-4" title="Figure&nbsp;4: Mukims with non-exceedance probability of Relative Aboundance < 0.7"><img src="index_files/figure-html/fig-exc-1.png" class="img-fluid figure-img" width="672"></a>
+<a href="index_files/figure-html/fig-exc-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-4" title="Figure&nbsp;4: Mukims with non-exceedance probability of Relative Abundance < 0.7"><img src="index_files/figure-html/fig-exc-1.png" class="img-fluid figure-img" width="672"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-exc-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;4: Mukims with non-exceedance probability of Relative Aboundance &lt; 0.7
+Figure&nbsp;4: Mukims with non-exceedance probability of Relative Abundance &lt; 0.7
 </figcaption>
 </figure>
 </div>
@@ -332,10 +332,10 @@ Figure&nbsp;4: Mukims with non-exceedance probability of Relative Aboundance &lt
 <div id="fig-res" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-res-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="index_files/figure-html/fig-res-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-5" title="Figure&nbsp;5: Map of Pearson Residual"><img src="index_files/figure-html/fig-res-1.png" class="img-fluid figure-img" width="672"></a>
+<a href="index_files/figure-html/fig-res-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-5" title="Figure&nbsp;5: Spatial distribution of Pearson residuals from the Poisson Bayesian model of school counts per mukim"><img src="index_files/figure-html/fig-res-1.png" class="img-fluid figure-img" width="672"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-res-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;5: Map of Pearson Residual
+Figure&nbsp;5: Spatial distribution of Pearson residuals from the Poisson Bayesian model of school counts per mukim
 </figcaption>
 </figure>
 </div>
@@ -345,7 +345,7 @@ Figure&nbsp;5: Map of Pearson Residual
 </section>
 <section id="discussion" class="level2" data-number="5">
 <h2 data-number="5" class="anchored" data-anchor-id="discussion"><span class="header-section-number">5</span> Discussion</h2>
-<p>The results in <a href="#sec-results" class="quarto-xref">Section&nbsp;4</a> offer insights into both overall model performance and patterns of educational equity. Global Moran’s I statistic (0.213) is not substantially high (&lt;0.3), suggesting that the model captures most, but not all, of the residual spatial dependence. This is illustrated in <a href="#fig-res" class="quarto-xref">Figure&nbsp;5</a>, where the variation in residual colors suggests a reasonably good fit, though further improvement may be possible with additional spatial covariates or refined random effects. The negative relationship between population and school counts, as well as higher RA values in inland (rural) mukims than coastal ares with larger population suggests that school availability in rural mukims seem to be adequate, potentially due to legacy planning policies or intentional efforts to ensure equitable access in remote areas.</p>
+<p>The results in <a href="#sec-results-model" class="quarto-xref">Section&nbsp;4.2</a> offer insights into both overall model performance and patterns of educational equity. Global Moran’s I statistic (0.213) is not substantially high (&lt;0.3), suggesting that the model captures most, but not all, of the residual spatial dependence. This is illustrated in <a href="#fig-res" class="quarto-xref">Figure&nbsp;5</a>, where the variation in residual colors suggests a reasonably good fit, though further improvement may be possible with additional spatial covariates or refined random effects. The negative relationship between population and school counts, as well as higher RA values in inland (rural) mukims than coastal ares with larger population suggests that school availability in rural mukims seem to be adequate, potentially due to legacy planning policies or intentional efforts to ensure equitable access in remote areas.</p>
 <p>In contrast, urban and peri-urban mukims in the Brunei-Muara District, the country’s most densely populated and economically active region, show signs of disparities in school access. Notably, the high non-exceedance probability of <span class="math inline">\(RA &lt; 0.7\)</span> in <strong>Mukim Sengkurong, Gadong A &amp; B, Berakas B, and Mentiri</strong> indicates that they have fewer schools than expected relative to their population sizes. These disparities highlight areas that may be underinvested in educational infrastructure, warranting closer policy attention.</p>
 <p>Importantly, these mukims are also encompass several new government housing developments, such as Perpindahan Lugu and Perpindahan Tanah Jambu. This suggests a potential planning gap, where population is increasing due to housing developments, but educational infrastructure has not yet caught up.</p>
 <p>However, inspection of <a href="#fig-sch" class="quarto-xref">Figure&nbsp;2</a> reveals that these areas have a similar number of schools compared to their neighboring mukims. This suggests that while the absolute number of schools may not be unusually low, the rapid increase in population within these new housing areas may have outpaced school capacity, leading to a situation where demand exceeds supply within these specific zones.</p>

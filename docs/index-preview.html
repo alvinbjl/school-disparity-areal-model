@@ -189,7 +189,7 @@
   });
 </script>   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script> 
       <meta name="citation_title" content="Spatial Analysis on School Inequalities in Brunei Darussalam Using Bayesian Hierarchical Modelling">
-<meta name="citation_abstract" content="Understanding the spatial distribution of schools is essential for promoting equitable access to education. This study investigates spatial disparities in school availability across Brunei Darussalam, with the aim of identifying potentially underserved areas. An initial exploratory data analysis (EDA) was conducted to examine school counts across mukims. The core analysis applie Bayesian spatial Poisson model using Integrated Nested Laplace Approximation (INLA) to estimate the relative abundance of schools, adjusting for expected counts based on population, geographic area, and a socioeconomic indicator (median house price, partially simulated). Both spatially structured and unstructured random effects were included to account for latent spatial processes. Posterior estimates revealed several mukims with significantly lower school availability relative to the national baseline, offering valuable insights to support future policy planning and equitable school placement.
+<meta name="citation_abstract" content="Understanding the spatial distribution of schools is essential for promoting equitable access to education. This study investigates spatial disparities in school availability across Brunei Darussalam, with the aim of identifying potentially underserved areas. An initial exploratory data analysis (EDA) was conducted to examine school counts across mukims. The core analysis applie Bayesian spatial Poisson model using Integrated Nested Laplace Approximation (INLA) to estimate the relative abundance of schools, adjusting for expected counts based on population, size of geographic area, and a socioeconomic indicator (median house price, partially simulated). Both spatially structured and unstructured random effects were included to account for latent spatial processes. Posterior estimates revealed several mukims with significantly lower school availability relative to the national baseline, offering valuable insights to support future policy planning and equitable school placement.
 ">
 <meta name="citation_author" content="Alvin Bong">
 <meta name="citation_language" content="en">
@@ -243,7 +243,7 @@
                 <div>
             <div class="quarto-title-meta-heading">Modified</div>
             <div class="quarto-title-meta-contents">
-              <p class="date-modified">October 1, 2025</p>
+              <p class="date-modified">October 2, 2025</p>
             </div>
           </div>
                 
@@ -256,7 +256,7 @@
     <div>
       <div class="abstract">
         <div class="block-title">Abstract</div>
-        <p>Understanding the spatial distribution of schools is essential for promoting equitable access to education. This study investigates spatial disparities in school availability across Brunei Darussalam, with the aim of identifying potentially underserved areas. An initial exploratory data analysis (EDA) was conducted to examine school counts across mukims. The core analysis applie Bayesian spatial Poisson model using Integrated Nested Laplace Approximation (INLA) to estimate the relative abundance of schools, adjusting for expected counts based on population, geographic area, and a socioeconomic indicator (median house price, partially simulated). Both spatially structured and unstructured random effects were included to account for latent spatial processes. Posterior estimates revealed several mukims with significantly lower school availability relative to the national baseline, offering valuable insights to support future policy planning and equitable school placement.</p>
+        <p>Understanding the spatial distribution of schools is essential for promoting equitable access to education. This study investigates spatial disparities in school availability across Brunei Darussalam, with the aim of identifying potentially underserved areas. An initial exploratory data analysis (EDA) was conducted to examine school counts across mukims. The core analysis applie Bayesian spatial Poisson model using Integrated Nested Laplace Approximation (INLA) to estimate the relative abundance of schools, adjusting for expected counts based on population, size of geographic area, and a socioeconomic indicator (median house price, partially simulated). Both spatially structured and unstructured random effects were included to account for latent spatial processes. Posterior estimates revealed several mukims with significantly lower school availability relative to the national baseline, offering valuable insights to support future policy planning and equitable school placement.</p>
       </div>
     </div>
 
@@ -279,7 +279,7 @@
   <li><a href="#sec-results" id="toc-sec-results" class="nav-link" data-scroll-target="#sec-results"><span class="header-section-number">4</span> Results</a>
   <ul class="collapse">
   <li><a href="#exploratory-data-analysis" id="toc-exploratory-data-analysis" class="nav-link" data-scroll-target="#exploratory-data-analysis"><span class="header-section-number">4.1</span> Exploratory Data Analysis</a></li>
-  <li><a href="#model" id="toc-model" class="nav-link" data-scroll-target="#model"><span class="header-section-number">4.2</span> Model</a></li>
+  <li><a href="#sec-results-model" id="toc-sec-results-model" class="nav-link" data-scroll-target="#sec-results-model"><span class="header-section-number">4.2</span> Model</a></li>
   </ul></li>
   <li><a href="#discussion" id="toc-discussion" class="nav-link" data-scroll-target="#discussion"><span class="header-section-number">5</span> Discussion</a>
   <ul class="collapse">
@@ -619,7 +619,7 @@ date (1): date
 </section>
 <section id="sec-method" class="level2" data-number="3">
 <h2 data-number="3" class="anchored" data-anchor-id="sec-method"><span class="header-section-number">3</span> Method</h2>
-<p>Choropath map is used for exploratory data analysis to give an overview of school counts per mukim and overall geography of Brunei.</p>
+<p>Choropleth map is used for exploratory data analysis to give an overview of school counts per mukim and overall geography of Brunei.</p>
 <section id="spatial-regression-model" class="level3" data-number="3.1">
 <h3 data-number="3.1" class="anchored" data-anchor-id="spatial-regression-model"><span class="header-section-number">3.1</span> Spatial regression model</h3>
 <p>Let <span class="math inline">\(Y_i\)</span> and <span class="math inline">\(E_i\)</span> denote the observed and expected counts of schools, respectively, in mukim <span class="math inline">\(i \in \{1, \dotsc, n\}\)</span>. Let <span class="math inline">\(\theta_i\)</span> represent the <em>relative abundance</em> of schools in mukim <span class="math inline">\(i\)</span>, analogous to a relative risk in disease mapping. The model is specified as follow:</p>
@@ -1053,8 +1053,8 @@ Figure&nbsp;2: Choropleth Map of school count by mukim. Grey boundaries denote m
 </div>
 </div></div>
 </section>
-<section id="model" class="level3" data-number="4.2">
-<h3 data-number="4.2" class="anchored" data-anchor-id="model"><span class="header-section-number">4.2</span> Model</h3>
+<section id="sec-results-model" class="level3" data-number="4.2">
+<h3 data-number="4.2" class="anchored" data-anchor-id="sec-results-model"><span class="header-section-number">4.2</span> Model</h3>
 <div class="cell-container"><div class="cell-decorator"><pre>In [5]:</pre></div><div class="cell">
 <div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Model y ~ pop + hp (socioeconomic) + u_i +v_i (Only Brunei, by mukim) --------------------------</span></span>
 <span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -1117,11 +1117,11 @@ if this sub-graph count seems unexpected, try increasing the snap argument.</cod
 <span id="cb62-9"><a href="#cb62-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb62-10"><a href="#cb62-10" aria-hidden="true" tabindex="-1"></a>res<span class="sc">$</span>summary.fitted.values<span class="sc">$</span>mean <span class="co"># values too high for forested area</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code> [1] 12.31093 12.31431 12.55397 12.79899 12.34949 13.09716 12.14464 12.57048
- [9] 12.34605 12.32399 12.46060 12.53155 12.25047 12.57254 12.29276 12.84757
-[17] 12.62717 12.65946 12.65074 12.61542 12.54256 11.83580 12.61149 12.54250
-[25] 12.76548 12.61146 12.57078 12.54259 11.98371 12.37442 12.42108 12.33722
-[33] 12.42918 12.34598 13.09102 12.63962 12.66031 12.56034 12.87345</code></pre>
+<pre><code> [1] 12.31109 12.31447 12.55390 12.79898 12.34966 13.09716 12.14464 12.57048
+ [9] 12.34605 12.32399 12.46060 12.53153 12.25047 12.57247 12.29277 12.84756
+[17] 12.62706 12.65937 12.65064 12.61532 12.54256 11.83581 12.61149 12.54250
+[25] 12.76547 12.61146 12.57078 12.54259 11.98371 12.37463 12.42108 12.33722
+[33] 12.42918 12.34599 13.09102 12.63954 12.66031 12.56034 12.87344</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb64"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a>brn_mkm_sch_sf<span class="sc">$</span>PM <span class="ot">&lt;-</span> res<span class="sc">$</span>summary.fitted.values[, <span class="st">"mean"</span>]</span>
 <span id="cb64-2"><a href="#cb64-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -1133,279 +1133,279 @@ if this sub-graph count seems unexpected, try increasing the snap argument.</cod
 <span id="cb64-8"><a href="#cb64-8" aria-hidden="true" tabindex="-1"></a>marginals_summaries <span class="ot">&lt;-</span> <span class="fu">lapply</span>(marginals,</span>
 <span id="cb64-9"><a href="#cb64-9" aria-hidden="true" tabindex="-1"></a>                              <span class="at">FUN =</span> <span class="cf">function</span>(marg){<span class="fu">inla.zmarginal</span>(marg)})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Mean            241118 
-Stdev           99485.9 
-Quantile  0.025 93485.8 
-Quantile  0.25  171683 
-Quantile  0.5   225664 
-Quantile  0.75  291831 
-Quantile  0.975 481007 
-Mean            234276 
-Stdev           75789.2 
-Quantile  0.025 118844 
-Quantile  0.25  180360 
-Quantile  0.5   222996 
-Quantile  0.75  275327 
-Quantile  0.975 414721 
-Mean            296428 
-Stdev           91673.5 
-Quantile  0.025 155485 
-Quantile  0.25  231637 
-Quantile  0.5   283114 
-Quantile  0.75  345943 
-Quantile  0.975 514343 
-Mean            361870 
-Stdev           3695.85 
-Quantile  0.025 353708 
-Quantile  0.25  360100 
+<pre><code>Mean            241174 
+Stdev           99532.5 
+Quantile  0.025 93404.2 
+Quantile  0.25  171719 
+Quantile  0.5   225733 
+Quantile  0.75  291917 
+Quantile  0.975 481129 
+Mean            234332 
+Stdev           75867.9 
+Quantile  0.025 118787 
+Quantile  0.25  180361 
+Quantile  0.5   223040 
+Quantile  0.75  275422 
+Quantile  0.975 414967 
+Mean            296413 
+Stdev           91694 
+Quantile  0.025 155447 
+Quantile  0.25  231613 
+Quantile  0.5   283094 
+Quantile  0.75  345928 
+Quantile  0.975 514392 
+Mean            361869 
+Stdev           3711.53 
+Quantile  0.025 353659 
+Quantile  0.25  360102 
 Quantile  0.5   361881 
-Quantile  0.75  363645 
-Quantile  0.975 369862 
-Mean            240816 
-Stdev           72055.7 
-Quantile  0.025 130913 
-Quantile  0.25  189829 
-Quantile  0.5   230005 
-Quantile  0.75  279521 
-Quantile  0.975 412847 
-Mean            487581 
-Stdev           4994.73 
-Quantile  0.025 476061 
-Quantile  0.25  485279 
+Quantile  0.75  363643 
+Quantile  0.975 369903 
+Mean            240870 
+Stdev           72125.9 
+Quantile  0.025 130893 
+Quantile  0.25  189834 
+Quantile  0.5   230039 
+Quantile  0.75  279601 
+Quantile  0.975 413091 
+Mean            487577 
+Stdev           5016.35 
+Quantile  0.025 475978 
+Quantile  0.25  485281 
 Quantile  0.5   487729 
-Quantile  0.75  490070 
-Quantile  0.975 497871 
-Mean            188095 
-Stdev           1925.68 
-Quantile  0.025 184059 
-Quantile  0.25  187136 
+Quantile  0.75  490067 
+Quantile  0.975 497910 
+Mean            188096 
+Stdev           1934.01 
+Quantile  0.025 184041 
+Quantile  0.25  187138 
 Quantile  0.5   188044 
-Quantile  0.75  188979 
-Quantile  0.975 192471 
+Quantile  0.75  188978 
+Quantile  0.975 192500 
 Mean            287947 
-Stdev           2939.18 
-Quantile  0.025 281468 
-Quantile  0.25  286537 
+Stdev           2951.61 
+Quantile  0.025 281430 
+Quantile  0.25  286539 
 Quantile  0.5   287953 
-Quantile  0.75  289357 
-Quantile  0.975 294314 
-Mean            230062 
-Stdev           2351.46 
-Quantile  0.025 225047 
-Quantile  0.25  228906 
+Quantile  0.75  289355 
+Quantile  0.975 294347 
+Mean            230063 
+Stdev           2361.51 
+Quantile  0.025 225022 
+Quantile  0.25  228908 
 Quantile  0.5   230023 
-Quantile  0.75  231159 
-Quantile  0.975 235323 
-Mean            225044 
-Stdev           2298.68 
-Quantile  0.025 220111 
-Quantile  0.25  223919 
+Quantile  0.75  231158 
+Quantile  0.975 235355 
+Mean            225045 
+Stdev           2308.46 
+Quantile  0.025 220086 
+Quantile  0.25  223920 
 Quantile  0.5   225013 
-Quantile  0.75  226122 
-Quantile  0.975 230157 
+Quantile  0.75  226121 
+Quantile  0.975 230188 
 Mean            257985 
-Stdev           2633.3 
-Quantile  0.025 252231 
-Quantile  0.25  256713 
+Stdev           2644.44 
+Quantile  0.025 252198 
+Quantile  0.25  256715 
 Quantile  0.5   257977 
-Quantile  0.75  259239 
-Quantile  0.975 263740 
-Mean            292737 
-Stdev           100823 
-Quantile  0.025 143204 
-Quantile  0.25  222107 
-Quantile  0.5   276472 
-Quantile  0.75  344438 
-Quantile  0.975 537272 
-Mean            209092 
-Stdev           2138.69 
-Quantile  0.025 204588 
-Quantile  0.25  208031 
+Quantile  0.75  259238 
+Quantile  0.975 263772 
+Mean            292738 
+Stdev           100849 
+Quantile  0.025 143183 
+Quantile  0.25  222101 
+Quantile  0.5   276466 
+Quantile  0.75  344434 
+Quantile  0.975 537353 
+Mean            209093 
+Stdev           2147.89 
+Quantile  0.025 204567 
+Quantile  0.25  208032 
 Quantile  0.5   209042 
-Quantile  0.75  210079 
-Quantile  0.975 213931 
-Mean            305219 
-Stdev           106294 
-Quantile  0.025 149428 
-Quantile  0.25  230853 
-Quantile  0.5   287484 
-Quantile  0.75  358969 
-Quantile  0.975 564606 
-Mean            218126 
-Stdev           2233.6 
-Quantile  0.025 213466 
-Quantile  0.25  217010 
+Quantile  0.75  210078 
+Quantile  0.975 213962 
+Mean            305208 
+Stdev           106326 
+Quantile  0.025 149399 
+Quantile  0.25  230832 
+Quantile  0.5   287461 
+Quantile  0.75  358948 
+Quantile  0.975 564700 
+Mean            218127 
+Stdev           2243.29 
+Quantile  0.025 213445 
+Quantile  0.25  217011 
 Quantile  0.5   218061 
-Quantile  0.75  219148 
-Quantile  0.975 223221 
-Mean            379883 
-Stdev           3878.41 
-Quantile  0.025 371260 
-Quantile  0.25  378036 
+Quantile  0.75  219146 
+Quantile  0.975 223255 
+Mean            379882 
+Stdev           3894.83 
+Quantile  0.025 371207 
+Quantile  0.25  378038 
 Quantile  0.5   379910 
-Quantile  0.75  381757 
-Quantile  0.975 388210 
-Mean            317004 
-Stdev           90591.1 
-Quantile  0.025 173324 
-Quantile  0.25  252975 
-Quantile  0.5   305266 
-Quantile  0.75  367502 
-Quantile  0.975 528597 
-Mean            329891 
-Stdev           103893 
-Quantile  0.025 171796 
-Quantile  0.25  256324 
-Quantile  0.5   314258 
-Quantile  0.75  385622 
-Quantile  0.975 578171 
-Mean            325469 
-Stdev           96411.9 
-Quantile  0.025 174443 
-Quantile  0.25  257101 
-Quantile  0.5   312370 
-Quantile  0.75  378858 
-Quantile  0.975 551987 
-Mean            314199 
-Stdev           93437.6 
-Quantile  0.025 168828 
-Quantile  0.25  248127 
-Quantile  0.5   301155 
-Quantile  0.75  365315 
-Quantile  0.975 534903 
+Quantile  0.75  381754 
+Quantile  0.975 388251 
+Mean            316981 
+Stdev           90625.5 
+Quantile  0.025 173246 
+Quantile  0.25  252930 
+Quantile  0.5   305241 
+Quantile  0.75  367496 
+Quantile  0.975 528654 
+Mean            329880 
+Stdev           103963 
+Quantile  0.025 171719 
+Quantile  0.25  256267 
+Quantile  0.5   314222 
+Quantile  0.75  385626 
+Quantile  0.975 578371 
+Mean            325455 
+Stdev           96466.8 
+Quantile  0.025 174358 
+Quantile  0.25  257048 
+Quantile  0.5   312344 
+Quantile  0.75  378868 
+Quantile  0.975 552114 
+Mean            314178 
+Stdev           93472.3 
+Quantile  0.025 168764 
+Quantile  0.25  248086 
+Quantile  0.5   301127 
+Quantile  0.75  365305 
+Quantile  0.975 534979 
 Mean            280021 
-Stdev           2858.62 
-Quantile  0.025 273836 
-Quantile  0.25  278630 
+Stdev           2870.73 
+Quantile  0.025 273803 
+Quantile  0.25  278632 
 Quantile  0.5   279996 
-Quantile  0.75  281371 
-Quantile  0.975 286329 
-Mean            138119 
-Stdev           1419.17 
-Quantile  0.025 135224 
-Quantile  0.25  137400 
+Quantile  0.75  281369 
+Quantile  0.975 286365 
+Mean            138120 
+Stdev           1425.48 
+Quantile  0.025 135213 
+Quantile  0.25  137401 
 Quantile  0.5   138061 
-Quantile  0.75  138756 
-Quantile  0.975 141418 
+Quantile  0.75  138755 
+Quantile  0.975 141442 
 Mean            300003 
-Stdev           3062.34 
-Quantile  0.025 293345 
-Quantile  0.25  298518 
+Stdev           3075.3 
+Quantile  0.025 293308 
+Quantile  0.25  298520 
 Quantile  0.5   299985 
-Quantile  0.75  301455 
-Quantile  0.975 306729 
+Quantile  0.75  301453 
+Quantile  0.975 306767 
 Mean            280003 
-Stdev           2858.2 
-Quantile  0.025 273789 
-Quantile  0.25  278616 
+Stdev           2870.3 
+Quantile  0.025 273755 
+Quantile  0.25  278618 
 Quantile  0.5   279985 
-Quantile  0.75  281358 
-Quantile  0.975 286281 
-Mean            349945 
-Stdev           3572.03 
-Quantile  0.025 342085 
-Quantile  0.25  348229 
+Quantile  0.75  281356 
+Quantile  0.975 286316 
+Mean            349944 
+Stdev           3587.14 
+Quantile  0.025 342039 
+Quantile  0.25  348231 
 Quantile  0.5   349948 
-Quantile  0.75  351655 
-Quantile  0.975 357698 
+Quantile  0.75  351653 
+Quantile  0.975 357738 
 Mean            299995 
-Stdev           3062.4 
-Quantile  0.025 293324 
-Quantile  0.25  298512 
+Stdev           3075.36 
+Quantile  0.025 293287 
+Quantile  0.25  298514 
 Quantile  0.5   299980 
-Quantile  0.75  301449 
-Quantile  0.975 306709 
-Mean            288036 
-Stdev           2941.56 
-Quantile  0.025 281696 
-Quantile  0.25  286601 
+Quantile  0.75  301447 
+Quantile  0.975 306746 
+Mean            288037 
+Stdev           2954.05 
+Quantile  0.025 281662 
+Quantile  0.25  286603 
 Quantile  0.5   288004 
-Quantile  0.75  289421 
-Quantile  0.975 294552 
+Quantile  0.75  289419 
+Quantile  0.975 294590 
 Mean            280030 
-Stdev           2861.44 
-Quantile  0.025 273854 
-Quantile  0.25  278636 
+Stdev           2873.62 
+Quantile  0.025 273821 
+Quantile  0.25  278637 
 Quantile  0.5   280001 
-Quantile  0.75  281378 
-Quantile  0.975 286361 
-Mean            160136 
-Stdev           1644.84 
-Quantile  0.025 156775 
-Quantile  0.25  159303 
+Quantile  0.75  281376 
+Quantile  0.975 286397 
+Mean            160137 
+Stdev           1652.14 
+Quantile  0.025 156762 
+Quantile  0.25  159304 
 Quantile  0.5   160070 
-Quantile  0.75  160875 
-Quantile  0.975 163954 
-Mean            245909 
-Stdev           69970.2 
+Quantile  0.75  160874 
+Quantile  0.975 163982 
+Mean            245971 
+Stdev           70031.5 
 Quantile  0.025 137864 
-Quantile  0.25  196709 
-Quantile  0.5   235764 
-Quantile  0.75  283504 
-Quantile  0.975 412498 
+Quantile  0.25  196734 
+Quantile  0.5   235806 
+Quantile  0.75  283580 
+Quantile  0.975 412739 
 Mean            247988 
-Stdev           2531.62 
-Quantile  0.025 242460 
-Quantile  0.25  246765 
+Stdev           2542.34 
+Quantile  0.025 242429 
+Quantile  0.25  246766 
 Quantile  0.5   247979 
-Quantile  0.75  249193 
-Quantile  0.975 253525 
-Mean            228041 
-Stdev           2328.93 
-Quantile  0.025 223039 
-Quantile  0.25  226902 
+Quantile  0.75  249191 
+Quantile  0.975 253556 
+Mean            228042 
+Stdev           2338.83 
+Quantile  0.025 223013 
+Quantile  0.25  226903 
 Quantile  0.5   228011 
-Quantile  0.75  229134 
-Quantile  0.975 233216 
+Quantile  0.75  229133 
+Quantile  0.975 233247 
 Mean            250006 
-Stdev           2552.29 
-Quantile  0.025 244460 
-Quantile  0.25  248768 
+Stdev           2563.1 
+Quantile  0.025 244429 
+Quantile  0.25  248769 
 Quantile  0.5   249989 
-Quantile  0.75  251215 
-Quantile  0.975 255615 
-Mean            230048 
-Stdev           2349.95 
-Quantile  0.025 225012 
-Quantile  0.25  228896 
+Quantile  0.75  251214 
+Quantile  0.975 255647 
+Mean            230049 
+Stdev           2359.96 
+Quantile  0.025 224986 
+Quantile  0.25  228898 
 Quantile  0.5   230015 
-Quantile  0.75  231149 
-Quantile  0.975 235282 
-Mean            484596 
-Stdev           4960.58 
-Quantile  0.025 473190 
-Quantile  0.25  482303 
+Quantile  0.75  231147 
+Quantile  0.975 235313 
+Mean            484593 
+Stdev           4981.97 
+Quantile  0.025 473109 
+Quantile  0.25  482305 
 Quantile  0.5   484736 
-Quantile  0.75  487064 
-Quantile  0.975 494850 
-Mean            322483 
-Stdev           98072.4 
-Quantile  0.025 171045 
-Quantile  0.25  253035 
-Quantile  0.5   308426 
-Quantile  0.75  375868 
-Quantile  0.975 555000 
+Quantile  0.75  487060 
+Quantile  0.975 494890 
+Mean            322472 
+Stdev           98128 
+Quantile  0.025 170974 
+Quantile  0.25  252988 
+Quantile  0.5   308399 
+Quantile  0.75  375874 
+Quantile  0.975 555148 
 Mean            315012 
-Stdev           3216.14 
-Quantile  0.025 308032 
-Quantile  0.25  313450 
+Stdev           3229.77 
+Quantile  0.025 307993 
+Quantile  0.25  313452 
 Quantile  0.5   314989 
-Quantile  0.75  316534 
-Quantile  0.975 322088 
-Mean            285043 
-Stdev           2910.85 
-Quantile  0.025 278778 
-Quantile  0.25  283621 
+Quantile  0.75  316532 
+Quantile  0.975 322128 
+Mean            285044 
+Stdev           2923.21 
+Quantile  0.025 278745 
+Quantile  0.25  283623 
 Quantile  0.5   285009 
-Quantile  0.75  286411 
-Quantile  0.975 291499 
-Mean            389843 
-Stdev           3981.4 
-Quantile  0.025 380931 
-Quantile  0.25  387958 
-Quantile  0.5   389888 
-Quantile  0.75  391778 
-Quantile  0.975 398331 </code></pre>
+Quantile  0.75  286410 
+Quantile  0.975 291537 
+Mean            389842 
+Stdev           3998.29 
+Quantile  0.025 380875 
+Quantile  0.25  387960 
+Quantile  0.5   389887 
+Quantile  0.75  391776 
+Quantile  0.975 398371 </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb66"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Posterior mean</span></span>
 <span id="cb66-2"><a href="#cb66-2" aria-hidden="true" tabindex="-1"></a>brn_mkm_sch_sf<span class="sc">$</span>PMoriginal <span class="ot">&lt;-</span> <span class="fu">sapply</span>(marginals_summaries, <span class="st">'[['</span>, <span class="st">"mean"</span>) </span>
@@ -1484,13 +1484,13 @@ if this sub-graph count seems unexpected, try increasing the snap argument.</cod
 <span id="cb71-17"><a href="#cb71-17" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(res)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Time used:
-    Pre = 2.88, Running = 0.953, Post = 0.0403, Total = 3.87 
+    Pre = 2.77, Running = 0.927, Post = 0.0372, Total = 3.73 
 Fixed effects:
               mean     sd 0.025quant 0.5quant 0.975quant   mode kld
 (Intercept)  1.046  0.397      0.257    1.049      1.818  1.049   0
 pop_s       -0.437  0.072     -0.579   -0.437     -0.296 -0.437   0
 area_s       0.016  0.009     -0.001    0.016      0.034  0.016   0
-hp_s        -6.528 11.516    -28.945   -6.594     16.281 -6.588   0
+hp_s        -6.526 11.516    -28.943   -6.592     16.283 -6.586   0
 
 Random effects:
   Name    Model
@@ -1498,7 +1498,7 @@ Random effects:
 
 Model hyperparameters:
                       mean       sd 0.025quant 0.5quant 0.975quant   mode
-Precision for re_u 1153.75 8110.198      9.353  149.975    7798.87 19.639
+Precision for re_u 1153.87 8111.630      9.353  149.976    7799.64 19.638
 Phi for re_u          0.36    0.279      0.013    0.293       0.93  0.021
 
 Marginal log-Likelihood:  -65.86 
@@ -1508,16 +1508,16 @@ Posterior summaries for the linear predictor and the fitted values are computed
 </div>
 <div class="sourceCode cell-code" id="cb73"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb73-1"><a href="#cb73-1" aria-hidden="true" tabindex="-1"></a>res<span class="sc">$</span>summary.fixed</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>                   mean           sd    0.025quant   0.5quant  0.975quant
-(Intercept)  1.04602217  0.397489773  2.566904e-01  1.0488814  1.81825795
-pop_s       -0.43707817  0.072303684 -5.794819e-01 -0.4369151 -0.29564097
-area_s       0.01610521  0.008811992 -9.804561e-04  0.0160325  0.03362208
-hp_s        -6.52830530 11.515874758 -2.894521e+01 -6.5941854 16.28072052
-                   mode          kld
-(Intercept)  1.04859091 1.810627e-08
-pop_s       -0.43692906 4.870341e-09
-area_s       0.01603795 2.111383e-08
-hp_s        -6.58828611 1.325594e-08</code></pre>
+<pre><code>                   mean           sd    0.025quant    0.5quant  0.975quant
+(Intercept)  1.04595986  0.397490896  2.566239e-01  1.04881972  1.81819613
+pop_s       -0.43707959  0.072303686 -5.794833e-01 -0.43691657 -0.29564236
+area_s       0.01610576  0.008811958 -9.798223e-04  0.01603305  0.03362259
+hp_s        -6.52623673 11.515868286 -2.894308e+01 -6.59213237 16.28282646
+                  mode          kld
+(Intercept)  1.0485291 1.811090e-08
+pop_s       -0.4369305 4.870436e-09
+area_s       0.0160385 2.111649e-08
+hp_s        -6.5862315 1.326013e-08</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb75"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a>brn_mkm_sch_sf<span class="sc">$</span>RA <span class="ot">&lt;-</span> res<span class="sc">$</span>summary.fitted.values[, <span class="st">"mean"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div></div>
@@ -1610,10 +1610,10 @@ give correct results for longitude/latitude data</code></pre>
 <div id="fig-exc" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-exc-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca" class="">
-<a href="index_files/figure-html/fig-exc-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-5" title="Figure&nbsp;4: Mukims with non-exceedance probability of Relative Aboundance < 0.7"><img src="index_files/figure-html/fig-exc-1.png" class="img-fluid figure-img" width="672"></a>
+<a href="index_files/figure-html/fig-exc-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-5" title="Figure&nbsp;4: Mukims with non-exceedance probability of Relative Abundance < 0.7"><img src="index_files/figure-html/fig-exc-1.png" class="img-fluid figure-img" width="672"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-exc-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;4: Mukims with non-exceedance probability of Relative Aboundance &lt; 0.7
+Figure&nbsp;4: Mukims with non-exceedance probability of Relative Abundance &lt; 0.7
 </figcaption>
 </figure>
 </div>
@@ -1638,10 +1638,10 @@ Figure&nbsp;4: Mukims with non-exceedance probability of Relative Aboundance &lt
 <div id="fig-res" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-res-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca" class="">
-<a href="index_files/figure-html/fig-res-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-6" title="Figure&nbsp;5: Map of Pearson Residual"><img src="index_files/figure-html/fig-res-1.png" class="img-fluid figure-img" width="672"></a>
+<a href="index_files/figure-html/fig-res-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-6" title="Figure&nbsp;5: Spatial distribution of Pearson residuals from the Poisson Bayesian model of school counts per mukim"><img src="index_files/figure-html/fig-res-1.png" class="img-fluid figure-img" width="672"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-res-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;5: Map of Pearson Residual
+Figure&nbsp;5: Spatial distribution of Pearson residuals from the Poisson Bayesian model of school counts per mukim
 </figcaption>
 </figure>
 </div>
@@ -1651,7 +1651,7 @@ Figure&nbsp;5: Map of Pearson Residual
 </section>
 <section id="discussion" class="level2" data-number="5">
 <h2 data-number="5" class="anchored" data-anchor-id="discussion"><span class="header-section-number">5</span> Discussion</h2>
-<p>The results in <a href="#sec-results" class="quarto-xref">Section&nbsp;4</a> offer insights into both overall model performance and patterns of educational equity. Global Moran’s I statistic (0.213) is not substantially high (&lt;0.3), suggesting that the model captures most, but not all, of the residual spatial dependence. This is illustrated in <a href="#fig-res" class="quarto-xref">Figure&nbsp;5</a>, where the variation in residual colors suggests a reasonably good fit, though further improvement may be possible with additional spatial covariates or refined random effects. The negative relationship between population and school counts, as well as higher RA values in inland (rural) mukims than coastal ares with larger population suggests that school availability in rural mukims seem to be adequate, potentially due to legacy planning policies or intentional efforts to ensure equitable access in remote areas.</p>
+<p>The results in <a href="#sec-results-model" class="quarto-xref">Section&nbsp;4.2</a> offer insights into both overall model performance and patterns of educational equity. Global Moran’s I statistic (0.213) is not substantially high (&lt;0.3), suggesting that the model captures most, but not all, of the residual spatial dependence. This is illustrated in <a href="#fig-res" class="quarto-xref">Figure&nbsp;5</a>, where the variation in residual colors suggests a reasonably good fit, though further improvement may be possible with additional spatial covariates or refined random effects. The negative relationship between population and school counts, as well as higher RA values in inland (rural) mukims than coastal ares with larger population suggests that school availability in rural mukims seem to be adequate, potentially due to legacy planning policies or intentional efforts to ensure equitable access in remote areas.</p>
 <p>In contrast, urban and peri-urban mukims in the Brunei-Muara District, the country’s most densely populated and economically active region, show signs of disparities in school access. Notably, the high non-exceedance probability of <span class="math inline">\(RA &lt; 0.7\)</span> in <strong>Mukim Sengkurong, Gadong A &amp; B, Berakas B, and Mentiri</strong> indicates that they have fewer schools than expected relative to their population sizes. These disparities highlight areas that may be underinvested in educational infrastructure, warranting closer policy attention.</p>
 <p>Importantly, these mukims are also encompass several new government housing developments, such as Perpindahan Lugu and Perpindahan Tanah Jambu. This suggests a potential planning gap, where population is increasing due to housing developments, but educational infrastructure has not yet caught up.</p>
 <p>However, inspection of <a href="#fig-sch" class="quarto-xref">Figure&nbsp;2</a> reveals that these areas have a similar number of schools compared to their neighboring mukims. This suggests that while the absolute number of schools may not be unusually low, the rapid increase in population within these new housing areas may have outpaced school capacity, leading to a situation where demand exceeds supply within these specific zones.</p>

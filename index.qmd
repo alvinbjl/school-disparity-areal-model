@@ -18,7 +18,7 @@ date-modified: last-modified
 bibliography: 
   - refs.bib
 abstract: |
-  Understanding the spatial distribution of schools is essential for promoting equitable access to education. This study investigates spatial disparities in school availability across Brunei Darussalam, with the aim of identifying potentially underserved areas. An initial exploratory data analysis (EDA) was conducted to examine school counts across mukims. The core analysis applie Bayesian spatial Poisson model using Integrated Nested Laplace Approximation (INLA) to estimate the relative abundance of schools, adjusting for expected counts based on population, geographic area, and a socioeconomic indicator (median house price, partially simulated). Both spatially structured and unstructured random effects were included to account for latent spatial processes. Posterior estimates revealed several mukims with significantly lower school availability relative to the national baseline, offering valuable insights to support future policy planning and equitable school placement.
+  Understanding the spatial distribution of schools is essential for promoting equitable access to education. This study investigates spatial disparities in school availability across Brunei Darussalam, with the aim of identifying potentially underserved areas. An initial exploratory data analysis (EDA) was conducted to examine school counts across mukims. The core analysis applie Bayesian spatial Poisson model using Integrated Nested Laplace Approximation (INLA) to estimate the relative abundance of schools, adjusting for expected counts based on population, size of geographic area, and a socioeconomic indicator (median house price, partially simulated). Both spatially structured and unstructured random effects were included to account for latent spatial processes. Posterior estimates revealed several mukims with significantly lower school availability relative to the national baseline, offering valuable insights to support future policy planning and equitable school placement.
 
 # Understanding the spatial distribution of educational infrastructure is essential for ensuring equitable access to schooling. This study examines regional disparities in school availability across Brunei and the neighboring Malaysian states of Sarawak and Sabah, with a focus on identifying potential underserved areas. First, exploratory data analysis (EDA) was conducted to compare school counts and student-teacher ratios at the district level across the three regions. The core analysis employs Standardized Incidence Ratio (SIR) and Bayesian spatial Poisson model using Integrated Nested Laplace Approximation (INLA) to estimate the relative abundance of schools across Brunei’s districts, adjusting for expected counts based on population, region size and socioeconomic indicator (house price + partially simulated). Spatially structured and unstructured random effects were incorporated to account for latent spatial processes. Posterior estimates identified districts with significantly lower school availability than the national baseline, supporting future policy planning and school placement.
 ---
@@ -254,7 +254,7 @@ To incorporate a socioeconomic indicator, we used median house prices derived fr
 
 
 ## Method {#sec-method}
-Choropath map is used for exploratory data analysis to give an overview of school counts per mukim and overall geography of Brunei.
+Choropleth map is used for exploratory data analysis to give an overview of school counts per mukim and overall geography of Brunei.
 
 ### Spatial regression model
 Let $Y_i$ and $E_i$ denote the observed and expected counts of schools, respectively, in mukim $i \in \{1, \dotsc, n\}$. Let $\theta_i$ represent the *relative abundance* of schools in mukim $i$, analogous to a relative risk in disease mapping. The model is specified as follow:
@@ -635,7 +635,7 @@ ggplot() +
   theme_minimal()
 ```
 
-### Model
+### Model {#sec-results-model}
 
 ```{r}
 #| include: false
@@ -837,7 +837,7 @@ ggplot() +
 
 ```{r}
 #| label: fig-res
-#| fig-cap: "Map of Pearson Residual"
+#| fig-cap: "Spatial distribution of Pearson residuals from the Poisson Bayesian model of school counts per mukim"
 
 fitted_counts <- brn_mkm_sch_sf$E * brn_mkm_sch_sf$RA
 brn_mkm_sch_sf$residuals_pearson <- (brn_mkm_sch_sf$Y - fitted_counts) / sqrt(fitted_counts)
@@ -857,7 +857,7 @@ ggplot() +
 
 ## Discussion
 
-The results in @sec-results offer insights into both overall model performance and patterns of educational equity. Global Moran's I statistic (0.213) is not substantially high (<0.3), suggesting that the model captures most, but not all, of the residual spatial dependence. This is illustrated in @fig-res, where the variation in residual colors suggests a reasonably good fit, though further improvement may be possible with additional spatial covariates or refined random effects. The negative relationship between population and school counts, as well as higher RA values in inland (rural) mukims than coastal ares with larger population suggests that school availability in rural mukims seem to be adequate, potentially due to legacy planning policies or intentional efforts to ensure equitable access in remote areas.
+The results in @sec-results-model offer insights into both overall model performance and patterns of educational equity. Global Moran's I statistic (0.213) is not substantially high (<0.3), suggesting that the model captures most, but not all, of the residual spatial dependence. This is illustrated in @fig-res, where the variation in residual colors suggests a reasonably good fit, though further improvement may be possible with additional spatial covariates or refined random effects. The negative relationship between population and school counts, as well as higher RA values in inland (rural) mukims than coastal ares with larger population suggests that school availability in rural mukims seem to be adequate, potentially due to legacy planning policies or intentional efforts to ensure equitable access in remote areas.
 
 In contrast, urban and peri-urban mukims in the Brunei-Muara District, the country’s most densely populated and economically active region, show signs of disparities in school access. Notably, the high non-exceedance probability of $RA < 0.7$ in **Mukim Sengkurong, Gadong A & B, Berakas B, and Mentiri** indicates that they have fewer schools than expected relative to their population sizes. These disparities highlight areas that may be underinvested in educational infrastructure, warranting closer policy attention.
 
