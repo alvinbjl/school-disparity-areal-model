@@ -1,0 +1,127 @@
+---
+output-dir: ../docs/presentation
+title: Bayesian Spatial Modeling of School Disparities in Brunei Darussalam
+format:
+  kaust-revealjs:
+    transition: fade
+    auto-stretch: false
+    width: 1250  # 1050
+    height: 760  # 700
+    self-contained: false
+    toc: false
+    toc-depth: 1
+    code-block-height: 700px
+    # html-table-processing: none
+author:
+  - name: Alvin Bong Jia Lok
+    email: bong.bong@kaust.edu.sa
+    affiliations: CEMSE, KAUST
+date: last-modified
+
+
+---
+
+## Introduction
+Education is a foundational pillar of national development and its people. Key factors for quality education:
+
+. . .
+
+::: incremental
+- Availability of school infrastructure
+- Equitable access to schools
+- Adequate teacher-to-student ratios 
+- Safe and inclusive learning environments
+:::
+
+. . .
+
+Several studies examined general aspects of education in Brunei.
+
+First analysis through spatial methods & statistical models!
+
+
+
+## Introduction
+Education is a foundational pillar of national development and its people. Key factors for quality education:
+
+
+- <span style="color: red;">Availability of school infrastructure</span>
+- <span style="color: red;">Equitable access to schools</span>
+- Adequate teacher-to-student ratios 
+- Safe and inclusive learning environments
+
+
+Several studies examined general aspects of education in Brunei.
+
+First to examine through spatial methods & statistical models!
+
+
+
+
+<!-- ## Introduction Cont. -->
+
+<!-- :::: {.columns} -->
+
+<!-- ::: {.column width="50%"} -->
+<!-- #### Goal -->
+<!-- ::: callout-note -->
+<!-- ## Main goal -->
+
+<!-- Identify adminstrative regions in Brunei where school availability falls significantly below the national baseline. -->
+<!-- ::: -->
+
+<!-- This supports future policy planning and school placements. -->
+
+<!-- ::: -->
+
+<!-- ::: {.column width="50%"} -->
+<!-- #### Data -->
+
+
+<!-- ::: -->
+
+<!-- :::: -->
+## Study Focus
+
+::: callout-note
+## Main goal
+
+Identify adminstrative regions in Brunei where school availability falls significantly below the national baseline.
+:::
+
+. . .
+
+This supports future policy planning and school placements. 
+
+**Study Region:** Brunei Darussalam
+
+**School Specification:** Primary & Secondary Government (PUBLIC) schools
+
+**Region:** 39 Mukim (sub-division of district)
+
+
+
+## Data
+
+## Study Focus & Data Overview
+
+- Key data:
+  - School counts (2018; latest detailed data)
+  - population (2021; census evey 10 years)
+  - administrative boundaries  
+  - Median house prices (1993–2025), used as socioeconomic covariate  
+- Data from Bruneiverse GitHub mainly via `bruneimap` R package
+- Missing house prices imputed via INLA-based Gaussian model; preferred over manual imputation  
+- House prices are partially simulated estimates, may not fully reflect market values
+- Raw school data in points; grouped into areal (mukim)
+
+
+
+## Methods
+
+###
+## Transition
+
+## Last slide
+
+Hello, World!

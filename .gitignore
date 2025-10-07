@@ -10,3 +10,4 @@ freeze
 _freeze
 
 # sites
+**/*.quarto_ipynb
