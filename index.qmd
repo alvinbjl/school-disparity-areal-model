@@ -267,18 +267,18 @@ While several studies have examined general aspects of education in Brunei, ther
 <!-- reference="sec-conc"}, we conclude. -->
 
 ## Data
-This study focuses exclusively on government primary and secondary schools in Brunei Darussalam, as these institutions serve as the main access points to education for most youth. Bayesian spatial modeling was conducted using Brunei’s 39 mukims (administrative region) as the unit of analysis to achieve a balance between geographic detail and interpretability. Key data variables that were used include *school counts*, *administrative boundary data*, *population*,  and *house prices*. These datasets were mostly sourced from Bruneiverse Github Page, particularly via the `bruneimap` R package, and were subsequently cleaned, wrangled, and merged primarily using `left_join()` and `rbind()` [@bruneimap; @jamil2025archives].
+This study focuses exclusively on government primary and secondary schools in Brunei Darussalam, as these institutions serve as the main access points to education for most youth. Bayesian spatial modeling was conducted using Brunei’s 39 mukims (administrative region) as the unit of analysis (areal analysis) to achieve a balance between geographic detail and interpretability. Key data variables that were used include *school counts*, *administrative boundary data*, *population*,  and *house prices*. These datasets were mostly sourced from Bruneiverse Github Page, particularly via the `bruneimap` R package, and were subsequently cleaned, wrangled, and merged primarily using `left_join()` and `rbind()` [@bruneimap; @jamil2025archives].
 
 The school dataset from 2018 was used as it is the most recent year for which disaggregated school-level data is available. Although more recent statistics exist, they are published only in summary form. Population data is drawn from the 2021 national census, the most recent census available in Brunei, despite the mismatch in years with the school dataset. Brunei conducts its national census every ten years, making the 2021 data the best option for population estimates.
 
 To incorporate a socioeconomic indicator, we used median house prices derived from approximately 30,000 property listings spanning 1993–2025. These were calculated at the mukim level and included as a covariate in the Bayesian model. In cases where house price data were missing, values were imputed using predictions from an INLA-based Gaussian model. Manual imputations based on local knowledge were initially tested, but the INLA-predicted values were ultimately adopted, as both methods produced similar model outcomes. Given the nature of the data, house prices were treated as partially simulated estimates and may not fully reflect actual market values.
 
 
-## Method {#sec-method}
+## Methods {#sec-method}
 Choropleth map is used for exploratory data analysis to give an overview of school counts per mukim and overall geography of Brunei.
 
 ### Spatial regression model
-Let $Y_i$ and $E_i$ denote the observed and expected counts of schools, respectively, in mukim $i \in \{1, \dotsc, n\}$. Let $\theta_i$ represent the *relative abundance* of schools in mukim $i$, analogous to a relative risk in disease mapping. The model is specified as follow:
+Let $Y_i$ and $E_i$ denote the observed and expected counts of schools, respectively, in mukim $i \in \{1, \dotsc, n\}$. Let $\theta_i$ represent the *relative abundance* of schools in mukim $i$, analogous to a relative risk in disease mapping. The Bayesian hierarchical model [@banerjee2003hierarchical], incorporating spatial Besag-York-Mollié (BYM) model [@besag1991bayesian] is specified as follow:
 
 $$
 Y_i \mid \theta_i \sim \text{Poisson}(E_i \cdot \theta_i), \quad i = 1, \dotsc, n
@@ -300,7 +300,7 @@ where:
 
 The spatial random effect $u_i$ requires a neighborhood (adjacency) matrix. Here, We define two mukims as neighbors if they share at least one boundary point (Queen contiguity). The neighborhood graph is constructed using the `poly2nb()` function from the `spdep` package. 
 
-Model fitting was performed in a Bayesian framework using the Integrated Nested Laplace Approximation (INLA). Model adequacy with respect to spatial structure is assessed by by examining the spatial autocorrelation ofstandardiszed Pearson residual defined as:
+Model fitting was performed in a Bayesian framework using the Integrated Nested Laplace Approximation (INLA) [@rue2009approximate]. Model adequacy with respect to spatial structure is assessed by by examining the spatial autocorrelation ofstandardiszed Pearson residual defined as:
 $$residual_i = \dfrac{Y_i - \mu_i}{\sqrt{\mu_i}} = \dfrac{Y_i - E_i \cdot \theta_i}{\sqrt{E_i \cdot \theta_i}},$$
 where $Y_i$ is the observed count, $E_i$ is the expected count (offset), and $\theta_i$ is the relative risk. Significant residual spatial autocorrelation may indicate unaccounted spatial structure in the model.
 
@@ -878,7 +878,7 @@ ggplot() +
 
 ## Discussion
 
-The results in @sec-results-model offer insights into both overall model performance and patterns of educational equity. Global Moran's I statistic (0.213) is not substantially high (<0.3), suggesting that the model captures most, but not all, of the residual spatial dependence. This is illustrated in @fig-res, where the variation in residual colors suggests a reasonably good fit, though further improvement may be possible with additional spatial covariates or refined random effects. The negative relationship between population and school counts, as well as higher RA values in inland (rural) mukims than coastal ares with larger population suggests that school availability in rural mukims seem to be adequate, potentially due to legacy planning policies or intentional efforts to ensure equitable access in remote areas.
+The results in @sec-results-model offer insights into both overall model performance and patterns of educational equity. Global Moran's I statistic (0.213) is not substantially high (<0.3), suggesting that the model captures most, but not all, of the residual spatial dependence. This is illustrated in @fig-res, where the variation in residual colors suggests a reasonably good fit, though further improvement may be possible with additional spatial covariates or refined random effects. The negative relationship between population and school counts, as well as higher RA values in inland (rural) mukims than coastal areas with larger population suggests that school availability in rural mukims seem to be adequate, potentially due to legacy planning policies or intentional efforts to ensure equitable access in remote areas.
 
 In contrast, urban and peri-urban mukims in the Brunei-Muara District, the country’s most densely populated and economically active region, show signs of disparities in school access. Notably, the high non-exceedance probability of $RA < 0.7$ in **Mukim Sengkurong, Gadong A & B, Berakas B, and Mentiri** indicates that they have fewer schools than expected relative to their population sizes. These disparities highlight areas that may be underinvested in educational infrastructure, warranting closer policy attention.
 

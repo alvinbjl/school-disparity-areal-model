@@ -14,8 +14,10 @@ format:
     # html-table-processing: none
 author:
   - name: Alvin Bong Jia Lok
-    email: bong.bong@kaust.edu.sa
-    affiliations: CEMSE, KAUST
+    affiliations: 
+      - 'VSRP, BAYESCOMP @ CEMSE-KAUST'
+      - '<span style="font-style:normal;">[`https://alvinbjl.github.io/school-disparity-areal-model/presentation/`](https://alvinbjl.github.io/school-disparity-areal-model/presentation/)</span>'
+bibliography: refs.bib
 date: last-modified
 
 
@@ -35,9 +37,9 @@ Education is a foundational pillar of national development and its people. Key f
 
 . . .
 
-Several studies examined general aspects of education in Brunei.
+Several studies examined general aspects of education in Brunei [@ebil2023overview; @abdul2021development; @salbrina2024education; @mohamad2018towards.
 
-First analysis through spatial methods & statistical models!
+First to examine through spatial methods & statistical models!
 
 
 
@@ -47,11 +49,11 @@ Education is a foundational pillar of national development and its people. Key f
 
 - <span style="color: red;">Availability of school infrastructure</span>
 - <span style="color: red;">Equitable access to schools</span>
-- Adequate teacher-to-student ratios 
-- Safe and inclusive learning environments
+- <span style="color: grey;">Adequate teacher-to-student ratios</span>
+- <span style="color: grey;">Safe and inclusive learning environments</span>
 
 
-Several studies examined general aspects of education in Brunei.
+Several studies examined general aspects of education in Brunei [@ebil2023overview; @abdul2021development; @salbrina2024education; @mohamad2018towards.
 
 First to examine through spatial methods & statistical models!
 
@@ -89,9 +91,10 @@ First to examine through spatial methods & statistical models!
 Identify adminstrative regions in Brunei where school availability falls significantly below the national baseline.
 :::
 
-. . .
 
 This supports future policy planning and school placements. 
+
+. . .
 
 **Study Region:** Brunei Darussalam
 
@@ -103,14 +106,12 @@ This supports future policy planning and school placements.
 
 ## Data
 
-## Study Focus & Data Overview
-
 - Key data:
   - School counts (2018; latest detailed data)
   - population (2021; census evey 10 years)
   - administrative boundaries  
   - Median house prices (1993–2025), used as socioeconomic covariate  
-- Data from Bruneiverse GitHub mainly via `bruneimap` R package
+- Data sourced from `Bruneiverse` GitHub page mainly via `bruneimap` R package [@bruneimap; @jamil2025archives]
 - Missing house prices imputed via INLA-based Gaussian model; preferred over manual imputation  
 - House prices are partially simulated estimates, may not fully reflect market values
 - Raw school data in points; grouped into areal (mukim)
@@ -118,10 +119,204 @@ This supports future policy planning and school placements.
 
 
 ## Methods
+### Bayesian Spatial Model
+Let $Y_i$ and $E_i$ denote the observed and expected counts of schools, respectively, in mukim $i \in \{1, \dotsc, n\}$. Let $\theta_i$ represent the **relative abundance (RA)** of schools in mukim $i$, analogous to a relative risk in disease mapping.
 
-###
-## Transition
+::: callout-note
+## Bayesian hierarchical model + BYM
+$$
+Y_i \mid \theta_i \sim \text{Poisson}(E_i \cdot \theta_i), \quad i = 1, \dotsc, n
+$$
 
-## Last slide
+$$
+\log(\theta_i) = \beta_0 + \beta_1 \cdot \text{pop}_i + \beta_2 \cdot \text{area}_i + \beta_3 \cdot \text{hp}_i + u_i + v_i,
+$$
+:::
 
-Hello, World!
+
+
+
+<!-- ::: {.nudge-down-small} -->
+<!-- - $\beta_0$ is the intercept, -->
+<!-- - $\beta_1$, $\beta_2$, and $\beta_3$ are regression coefficients for the standardized covariates: -->
+<!--   - $\text{pop}_i$: population (in units of 10,000), -->
+<!--   - $\text{area}_i$: mukim size (in units of 10 km²), -->
+<!--   - $\text{hp}_i$: median house price (in BND \$1,000,000), -->
+<!-- - $u_i$ is a structured spatial effect, modelled using an intrinsic conditional autoregressive (CAR) prior $u_i \mid u_{-i} \sim \mathcal{N}(\bar{u}_{\delta_i}, \frac{1}{\tau_u n_{\delta_i}})$ -->
+<!-- - $v_i$ is an unstructured random effect, $v_i \sim \text{Normal}(0, \frac{1}{\tau_v})$ -->
+<!-- ::: -->
+
+## Methods
+### Bayesian Spatial Model
+
+::: callout-note
+## Bayesian hierarchical model + BYM
+$$
+Y_i \mid \theta_i \sim \text{Poisson}(E_i \cdot \theta_i), \quad i = 1, \dotsc, n
+$$
+
+$$
+\log(\theta_i) = \beta_0 + \beta_1 \cdot \text{pop}_i + \beta_2 \cdot \text{area}_i + \beta_3 \cdot \text{hp}_i + u_i + v_i,
+$$
+:::
+
+::: {.nudge-down-small}
+- $\beta_0$ is the intercept,
+- $\beta_1$, $\beta_2$, and $\beta_3$ are regression coefficients for the standardized covariates:
+  - $\text{pop}_i$: population (in units of 10,000),
+  - $\text{area}_i$: mukim size (in units of 10 km²),
+  - $\text{hp}_i$: median house price (in BND \$1,000,000),
+- $u_i$ is a structured spatial effect, (CAR) prior $u_i \mid u_{-i} \sim \mathcal{N}(\bar{u}_{\delta_i}, \frac{1}{\tau_u n_{\delta_i}})$
+- $v_i$ is an unstructured random effect, $v_i \sim \text{Normal}(0, \frac{1}{\tau_v})$
+:::
+
+## Methods
+### Neighbour
+Spatial random effect $u_i$ uses Queen Contiguity neighborhood (adjacency) 
+
+### Estimation
+Model fitting performed using INLA [@rue2009approximate]. 
+
+### Spatial autocorrelation
+Model adequacy (spatial structure) is assessed by spatial autocorrelation (Global Moran's I) of residual:
+$$residual_i = \dfrac{Y_i - \mu_i}{\sqrt{\mu_i}} = \dfrac{Y_i - E_i \cdot \theta_i}{\sqrt{E_i \cdot \theta_i}},$$
+
+## Methods
+### Spatial autocorrelation (cont.)
+For each mukim in the study area  $i, j = 1, 2, \ldots, N$. The Moran’s I test statistic is defined as follows:
+
+$$
+I = \frac{N}{\sum_{i=1}^N \sum_{j=1}^N w_{ij}} \frac{\sum_{i=1}^N \sum_{j=1}^N w_{ij} (x_i - \bar{x})(x_j - \bar{x})}{\sum_{i=1}^N (x_i - \bar{x})^2} \in [-1,1],
+$$
+
+::: {.nudge-down-small}
+-   $x_i$ is the Pearson residual in mukim $i$,
+-   $\bar{x}$ is the mean residual per mukim,
+-   $w_{ij}$ is the spatial weight between mukims $i$ and $j$.
+:::
+
+## Methods
+### Spatial autocorrelation (cont.)
+Same Queen Contiguity neighbour is used.
+
+Central Limit Theorem (CLT) employed for hypthesis test for significance of the Moran’s I statistic (z-scores):
+
+-   $H_0: I = 0$ (no spatial autocorrelation),
+-   $H_1: I \neq 0$ (presence of spatial autocorrelation).
+
+
+# Results {.transition-slide}
+
+## Exploratory Data Analysis
+```{r}
+load("presentation_maps.RData")
+library(bruneimap)
+library(mapview)
+# Now you can use them
+mapview(dis_sf, zcol="district", alpha.regions=0, lwd=2, legend=FALSE) + mv1 
+```
+
+::: {.nudge-down-small}
+- Mukims with higher schools count are **concentrated in the coastal region** near South China Sea
+- As expected, schools are **more clustered in Brunei-Muara District** (northeast of the mainland), Brunei’s most populated and urbanized district
+
+:::
+
+## Model
+```{r}
+mv2
+```
+
+## Model
+``` {r, fig.height=4}
+library(knitr)
+library(dplyr)
+
+# Fixed effects data (simplified)
+fixed_effects <- tribble(
+  ~Term,         ~Mean,  ~`2.5%`, ~`97.5%`,
+  "(Intercept)", 1.076,  0.239,   1.893,
+  "pop_s",      -0.436, -0.579,  -0.295,
+  "area_s",      0.015, -0.002,   0.032,
+  "hp_s",       -0.759, -3.174,   1.705
+)
+
+# Print the table
+kable(fixed_effects, caption = "Fixed Effects Summary", digits = 3)
+
+```
+
+<br> 
+
+- School availability in rural mukims seem to be adequate
+  - Significant negative relationship between population and school counts
+  - Higher RA values in inland (rural) mukims than coastal areas with larger population 
+- Mukim size & house price NOT significant
+  - No clear "socio-economic" disparity (house price as proxy)
+
+## Non-exceedence Probability
+
+```{r, fig.height=4}
+mv3
+```
+
+
+::: {.nudge-down-small}
+- Disparitiy in **Mukim Sengkurong, Gadong A & B, Berakas B, and Mentiri**
+- Fewer schools than expected relative to population size
+- **Mukim Sengkurong & Mentiri** encompass new government housing developments (Perpindahan Lugu, Perpindahan Tanah Jambu)
+- Potential planning gap in schools infrastructure
+::::
+
+<!-- ## Spatial Autocorrelation -->
+<!-- :::: {.columns} -->
+
+<!-- ::: {.column width="50%"} -->
+<!-- ```{r} -->
+<!-- mv4 -->
+<!-- ``` -->
+<!-- ::: -->
+
+<!-- ::: {.column width="50%"} -->
+<!-- ::: {.nudge-down-small} -->
+<!-- - Global Moran's I: $0.213$ (p=0.0123 < 0.05) -->
+<!-- - Statistically significant evidence to reject the null hypothesis of no spatial autocorrelation in the residuals -->
+<!-- - Some spatial dependencies but not to high -->
+<!-- - Model is "moderately" good -->
+<!-- ::: -->
+<!-- ::: -->
+
+<!-- :::: -->
+
+## Spatial Autocorrelation
+
+```{r, fig.height=4}
+mv4
+```
+
+::: {.nudge-down-small}
+- Global Moran's I: $0.213$ (p=0.0123 < 0.05)
+- Statistically significant evidence to reject the null hypothesis of no spatial autocorrelation in the residuals
+- Some spatial dependencies but not "too high" 
+- Model is "moderately" good
+:::
+
+
+
+## Conclusion
+- Negative relationship between population size and relative school
+- Enough infrastructure in rural areas
+- Potetntial gaps in **Mukim Sengkurong, Gadong A & B, Berakas B, and Mentiri**
+
+<br> 
+
+### Limitations
+- Old school data (2018)
+- Population not age-standardized
+- Housing price is listing price & partially simulated
+- Only focus on public schools
+- Only consider "count" of schools, (school sizes, travel distance not accounted)
+
+
+
+## References

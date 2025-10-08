@@ -22,7 +22,7 @@ library(leaflet.extras2)
 library(RColorBrewer)
 library(patchwork)
 set.seed(123)
-# Data: map ---------------------------------------------------------------------
+# EXTRA: Map-malaysia ---------------------------------------------------------------------
 # Download Malaysia boundaries from GADM level1=States level=2Districts (Daerah)
 mys_state <- geodata::gadm(country = "MYS", level = 1, path = tempdir())
 mys_dis <- geodata::gadm(country = "MYS", level = 2, path = tempdir())
@@ -40,7 +40,7 @@ sbh_dis_sf <- mys_dis_sf %>% filter(state == "Sabah")
 swk_dis_sf <- mys_dis_sf %>% filter(state == "Sarawak")
 east_mys_dis_sf <- mys_dis_sf %>% filter(state %in% c("Sarawak", "Sabah"))
 
-# Data: Primary & secondary Schools, Population, sf ----------------------------------------------------------------
+# MAIN: Data-Primary & secondary Schools, Population, sf ----------------------------------------------------------------
 # A. Malaysia
 mys_sch_df <- read_csv("source/mys_schools_district.csv")
 
@@ -206,9 +206,11 @@ brn_dis_sch_sf <- left_join(brn_dis_sch_sf, dis_pop, by="district")
 nborneo_sch_sf <- rbind(east_mys_sch_sf, brn_dis_sch_sf)
 
 
-# EDA 0: spatial count ----------------------------------------------------
-mapview(mkm_sf, layer.name = "MKMs", alpha.regions = 0, color = "black") +
-  mapview(brn_mkm_sch_sf , zcol = "schools", col.region=pal)
+# MAIN: EDA1-spatial count ----------------------------------------------------
+mv1 <- mapview(brn_mkm_sch_sf , zcol = "schools", col.region=pal, layer.name="schools")
+mv1
+
+#ggplot
 label_sf <- brn_mkm_sch_sf |> 
   arrange(desc(schools)) |> 
   slice_head(n = 5) |> 
@@ -239,7 +241,7 @@ ggplot() +
   theme_minimal() +
   theme(legend.position = "top")
 
-# EDA1: school count ------------------------------------------------------------------
+# EXTRA: EDA2-school count ------------------------------------------------------------------
 nborneo_sch_sf <- nborneo_sch_sf %>% mutate(area = as.numeric(st_area(geometry)))
 nborneo_sch_sf <- nborneo_sch_sf %>% mutate(sch_pop = schools/population*100000, # per 10000 people
                                             sch_area = schools/area * 10000000) # per 10 km^2
@@ -385,7 +387,7 @@ m4 <- ggplot() +
 (m1 | m3) 
 # 2x1 gird
 (m2 | m4)
-# EDA2: std_tcr --------------------------------------------------------
+# EXTRA: EDA3-std_tcr --------------------------------------------------------
 # student teacher ratio
 brn_tchr <- bruneimap::tchr %>% 
   mutate(teachers = as.numeric(M) + as.numeric(`F`),
@@ -583,11 +585,7 @@ m5 + m6
 
 
 
-# 1. Global Spatial Autocorrelation ---------------------------------------
-
-
-# 2. Model y ~ pop + hp (socioeconomic) + u_i +v_i (Only Brunei, by mukim) --------------------------
-
+# MAIN: Model y ~ pop + hp (socioeconomic) + u_i +v_i (Only Brunei, by mukim) --------------------------
 # hp
 hp <- read_csv("source/brn_house_price.csv")
 hp <- hp %>% 
@@ -650,7 +648,7 @@ brn_mkm_sch_sf$area <- as.numeric(st_area(brn_mkm_sch_sf))
 brn_mkm_sch_sf$Y <- brn_mkm_sch_sf$schools
 brn_mkm_sch_sf$E <- sum(brn_mkm_sch_sf$schools)/sum(brn_mkm_sch_sf$population) * brn_mkm_sch_sf$population
 brn_mkm_sch_sf$SIR <- brn_mkm_sch_sf$Y/brn_mkm_sch_sf$E
-at <- c(0,0.5,1,2,3,4,5)
+at <- c(0,0.5,1,2,3,4,10)
 mapview(brn_mkm_sch_sf, zcol="SIR", col.region=pal, at=at, layer.name="SIR") # bad, overhighlihts, since low school count
 
 label_sf <- brn_mkm_sch_sf |> 
@@ -719,11 +717,12 @@ all.equal(exp(res$summary.linear.predictor$mean),
 
 brn_mkm_sch_sf$RA <- res$summary.fitted.values[, "mean"]
 
-m1 <- mapview(brn_mkm_sch_sf, zcol = "RA", col.region=pal, at=at)
-m2 <- mapview(brn_mkm_sch_sf, zcol = "hp", col.region=pal)
-at <- c(0,100,1000,10000,20000)
-m3 <- mapview(brn_mkm_sch_sf, zcol = "population", col.region=pal, at=at)
-leafsync::sync(m1, m2, m3)
+m1 <- mapview(brn_mkm_sch_sf, zcol = "RA", col.region=pal, at=at, layer.name="RA")
+m2 <- mapview(brn_mkm_sch_sf, zcol = "hp", col.region=pal, layer.name="House Price")
+at <- c(0,100,1000,10000,20000,45000)
+m3 <- mapview(brn_mkm_sch_sf, zcol = "population", col.region=pal, at=at, layer.name="Population")
+mv2 <- leafsync::sync(m1, m2, m3, mv1)
+mv2
 
 label_sf <- brn_mkm_sch_sf |> 
   filter(RA!=0) |> 
@@ -767,9 +766,10 @@ sch_sf <- sch_sf |> filter(Sector == "MOE",
                                          "Pre-primary",
                                          "Technical / Vocational Institution",
                                          "Vocational / Technical  Education")) 
-mapview(brn_mkm_sch_sf, zcol = "exc", col.region=pal, at=at, 
-        layer.name="Exceedance Probability RA < 0.7") + 
-  mapview(sch_sf, cex=4)
+mv3 <- mapview(brn_mkm_sch_sf, zcol = "exc", col.region=pal, at=at, 
+        layer.name="Non-Exceedance Probability RA < 0.7") + 
+        mapview(sch_sf, cex=4)
+mv3
 
 label_sf <- brn_mkm_sch_sf |> 
   arrange(desc(exc)) |> 
@@ -817,7 +817,7 @@ moran.test(residuals_pearson, lw)
 
 my_palette <- colorRampPalette(brewer.pal(11, "RdBu"))(100)
 mapview(brn_mkm_sch_sf, zcol="residuals_pearson", col.regions = my_palette, at = seq(-1, 3, length.out = 101))
-ggplot() +
+mv4 <- ggplot() +
   geom_sf(data = brn_mkm_sch_sf, aes(fill = residuals_pearson)) +
   geom_sf(data = mkm_sf, color="grey", alpha=0, linewidth=0.7) +
   scale_fill_viridis_b(
@@ -829,9 +829,11 @@ ggplot() +
   ) +
   labs(x = NULL, y = NULL) +
   theme_minimal()
+mv4
 
+# save(mv1, mv2, mv3, mv4, file = "presentation_maps.RData")
 
-# EXTRA:
+# ARCHIVED- --------------------------------------------------------------------------------------
 # Sarawak
 # view(swk_sch_sf)
 # swk_sch_sf_clean <- swk_sch_sf[complete.cases(st_drop_geometry(swk_sch_sf)), ]
