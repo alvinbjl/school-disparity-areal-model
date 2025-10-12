@@ -40,7 +40,7 @@ sbh_dis_sf <- mys_dis_sf %>% filter(state == "Sabah")
 swk_dis_sf <- mys_dis_sf %>% filter(state == "Sarawak")
 east_mys_dis_sf <- mys_dis_sf %>% filter(state %in% c("Sarawak", "Sabah"))
 
-# MAIN: Data-Primary & secondary Schools, Population, sf ----------------------------------------------------------------
+# EXTRA: Data-MYS-Primary & secondary Schools, Population, sf ----------------------------------------------------------------
 # A. Malaysia
 mys_sch_df <- read_csv("source/mys_schools_district.csv")
 
@@ -143,11 +143,11 @@ sbh_sch_sf <- left_join(sbh_dis_sf, sbh_sch_df, by="district") %>% select(-state
 swk_sch_sf <- left_join(swk_dis_sf, swk_sch_df, by="district") %>% select(-state)
 east_mys_sch_sf <- rbind(sbh_sch_sf, swk_sch_sf)
 
-# mapview(east_mys_sch_sf, zcol="schools")
+mapview(east_mys_sch_sf, zcol="schools")
 
 
 
-# B. Brunei
+# MAIN: Data-Brunei-Primary & secondary Schools, Population, sf ----------
 # Fix school on water village (slightly out of bound)
 brn_sch_sf <- bruneimap::sch_sf %>% 
   mutate(district = case_when(
@@ -831,7 +831,7 @@ mv4 <- ggplot() +
   theme_minimal()
 mv4
 
-# save(mv1, mv2, mv3, mv4, file = "presentation_maps.RData")
+save(mv1, mv2, mv3, mv4, file = "presentation_maps.RData")
 
 # ARCHIVED- --------------------------------------------------------------------------------------
 # Sarawak
