@@ -18,7 +18,7 @@ author:
       - 'VSRP, BAYESCOMP @ CEMSE-KAUST'
       - '<span style="font-style:normal;">[`https://alvinbjl.github.io/school-disparity-areal-model/presentation/`](https://alvinbjl.github.io/school-disparity-areal-model/presentation/)</span>'
 bibliography: refs.bib
-date: last-modified
+date: 2025-10-13
 
 
 ---
@@ -108,7 +108,7 @@ This supports future policy planning and school placements.
 
 - Key data:
   - School counts (2018; latest detailed data)
-  - population (2021; census evey 10 years)
+  - population & youth population (2021; census evey 10 years)
   - administrative boundaries  
   - Median house prices (1993–2025), used as socioeconomic covariate  
 - Data sourced from `Bruneiverse` GitHub page mainly via `bruneimap` R package [@bruneimap; @jamil2025archives]
@@ -129,7 +129,7 @@ Y_i \mid \theta_i \sim \text{Poisson}(E_i \cdot \theta_i), \quad i = 1, \dotsc, 
 $$
 
 $$
-\log(\theta_i) = \beta_0 + \beta_1 \cdot \text{pop}_i + \beta_2 \cdot \text{area}_i + \beta_3 \cdot \text{hp}_i + u_i + v_i,
+\log(\theta_i) = \beta_0 + \beta_1 \cdot \text{pop youth}_i + \beta_2 \cdot \text{area}_i + \beta_3 \cdot \text{hp}_i + u_i + v_i,
 $$
 :::
 
@@ -156,14 +156,14 @@ Y_i \mid \theta_i \sim \text{Poisson}(E_i \cdot \theta_i), \quad i = 1, \dotsc, 
 $$
 
 $$
-\log(\theta_i) = \beta_0 + \beta_1 \cdot \text{pop}_i + \beta_2 \cdot \text{area}_i + \beta_3 \cdot \text{hp}_i + u_i + v_i,
+\log(\theta_i) = \beta_0 + \beta_1 \cdot \text{pop youth}_i + \beta_2 \cdot \text{area}_i + \beta_3 \cdot \text{hp}_i + u_i + v_i,
 $$
 :::
 
 ::: {.nudge-down-small}
 - $\beta_0$ is the intercept,
 - $\beta_1$, $\beta_2$, and $\beta_3$ are regression coefficients for the standardized covariates:
-  - $\text{pop}_i$: population (in units of 10,000),
+  - $\text{pop youth}_i$: population of youth aged 0-24 (in units of 10,000),
   - $\text{area}_i$: mukim size (in units of 10 km²),
   - $\text{hp}_i$: median house price (in BND \$1,000,000),
 - $u_i$ is a structured spatial effect, (CAR) prior $u_i \mid u_{-i} \sim \mathcal{N}(\bar{u}_{\delta_i}, \frac{1}{\tau_u n_{\delta_i}})$
@@ -213,7 +213,7 @@ load("presentation_maps.RData")
 library(bruneimap)
 library(mapview)
 # Now you can use them
-mapview(dis_sf, zcol="district", alpha.regions=0, lwd=2, legend=FALSE) + mv1 
+mapview(dis_sf, zcol="district", alpha.regions=0, lwd=2, legend=FALSE) + mv1
 ```
 
 ::: {.nudge-down-small}
@@ -234,11 +234,11 @@ library(dplyr)
 
 # Fixed effects data (simplified)
 fixed_effects <- tribble(
-  ~Term,         ~Mean,  ~`2.5%`, ~`97.5%`,
-  "(Intercept)", 1.076,  0.239,   1.893,
-  "pop_s",      -0.436, -0.579,  -0.295,
-  "area_s",      0.015, -0.002,   0.032,
-  "hp_s",       -0.759, -3.174,   1.705
+  ~Term,         ~Mean,  ~`2.5%`, ~`97.5%`, ~Significant,
+  "(Intercept)", 0.824,  0.430,   1.215, "Yes",
+  "pop_y",  -0.123, -0.163,  -0.083, "Yes",
+  "area",      0.018, 0.001,   0.036, "Yes",
+  "hp",        0.001, -0.002,   0.003, "No"
 )
 
 # Print the table
@@ -249,9 +249,10 @@ kable(fixed_effects, caption = "Fixed Effects Summary", digits = 3)
 <br> 
 
 - School availability in rural mukims seem to be adequate
-  - Significant negative relationship between population and school counts
+  - Significant negative relationship between population youth and school counts
   - Higher RA values in inland (rural) mukims than coastal areas with larger population 
-- Mukim size & house price NOT significant
+  - Positive relationship between schools counts and mukim size
+- House price NOT significant
   - No clear "socio-economic" disparity (house price as proxy)
 
 ## Non-exceedence Probability

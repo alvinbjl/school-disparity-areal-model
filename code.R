@@ -207,6 +207,7 @@ nborneo_sch_sf <- rbind(east_mys_sch_sf, brn_dis_sch_sf)
 
 
 # MAIN: EDA1-spatial count ----------------------------------------------------
+pal <- colorRampPalette(brewer.pal(9, "YlOrRd"))
 mv1 <- mapview(brn_mkm_sch_sf , zcol = "schools", col.region=pal, layer.name="schools")
 mv1
 
@@ -813,7 +814,7 @@ brn_mkm_sch_sf$residuals_pearson <- (brn_mkm_sch_sf$Y - fitted_counts) / sqrt(fi
 # 3.2 Convert to spatial weights list
 lw <- nb2listw(nb, style = "W")
 # 3.3 Run Moran’s I test on residuals
-moran.test(residuals_pearson, lw)
+moran.test(brn_mkm_sch_sf$residuals_pearson, lw)
 
 my_palette <- colorRampPalette(brewer.pal(11, "RdBu"))(100)
 mapview(brn_mkm_sch_sf, zcol="residuals_pearson", col.regions = my_palette, at = seq(-1, 3, length.out = 101))

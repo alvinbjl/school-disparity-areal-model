@@ -325,9 +325,9 @@ my_palette <- colorRampPalette(brewer.pal(11, "RdBu"))(100)
 mapview(brn_mkm_sch_sf, zcol="residuals_pearson", col.regions = my_palette, at = seq(-1, 3, length.out = 101))
 mv4 <- ggplot() +
   geom_sf(data = brn_mkm_sch_sf, aes(fill = residuals_pearson)) +
-  geom_sf(data = mkm_sf, color="grey", alpha=0, linewidth=0.7) +
+  geom_sf(data = mkm_sf, color="white", alpha=0, linewidth=0.7) +
   scale_fill_viridis_b(
-    option = "E",
+    option = "mako",
     direction = 1,
     name = "Residual",
     na.value = NA,
@@ -337,5 +337,4 @@ mv4 <- ggplot() +
   theme_minimal()
 mv4
 
-# save(mv1, mv2, mv3, mv4, file = "presentation_maps.RData")
-
+save(mv1, mv2, mv3, mv4, file = "presentation_maps.RData")
