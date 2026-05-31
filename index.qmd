@@ -5,16 +5,16 @@ format:
     toc: true
     toc-expand: 2
     toc-location: left
-    # code-fold: truex
+    # code-fold: truexs
     embed-resources: true
     number-sections: true
     comments:
       hypothesis: true
     other-links:
       - text: "Presentation Slides"
-        href: "https://alvinbjl.github.io/school-areal-model/presentation/"
+        href: "https://alvinbjl.github.io/school-disparity-areal-model/presentation/"
       - text: "Poster for KAUST Statistic Workshop 2025"
-        href: "https://alvinbjl.github.io/school-areal-model/poster.pdf"
+        href: "https://alvinbjl.github.io/school-disparity-areal-model/poster.pdf"
 
   pdf:
     documentclass: article
